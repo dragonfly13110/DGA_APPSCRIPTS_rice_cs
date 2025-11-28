@@ -34,14 +34,35 @@ const COLUMN_NAMES = {
 };
 
 // ============================================
-// Web App Entry Point
+// Web App Router (3-in-1 Pattern)
 // ============================================
 function doGet(e) {
-  return HtmlService.createTemplateFromFile('Index')
-    .evaluate()
-    .setTitle("ระบบบันทึกข้อมูลการเพาะปลูกข้าว จ.ฉะเชิงเทรา")
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+  const page = e.parameter.page || 'main';
+
+  switch (page) {
+    case 'ai':
+      // 🤖 หน้า AI View (รายงานวิเคราะห์)
+      return HtmlService.createTemplateFromFile('AI_View')
+        .evaluate()
+        .setTitle("รายงานสถานการณ์ข้าวอัจฉริยะ (AI Insight)")
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+
+    case 'feedback':
+      // 📝 หน้าแบบประเมิน
+      return HtmlService.createTemplateFromFile('Feedback_Form')
+        .evaluate()
+        .setTitle("แบบสอบถามความพึงพอใจ - ทีมเป็ดน้อยร้อยหน้าที่")
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+
+    default:
+      // 🌐 หน้าบันทึกข้อมูล (Main / Default)
+      return HtmlService.createTemplateFromFile('Index')
+        .evaluate()
+        .setTitle("ระบบบันทึกข้อมูลการเพาะปลูกข้าว จ.ฉะเชิงเทรา")
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+  }
 }
 
 // ============================================
