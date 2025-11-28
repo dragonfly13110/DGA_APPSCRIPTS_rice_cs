@@ -5,6 +5,9 @@
 const FEEDBACK_SHEET_ID = "1RwzQQfDnQGQiucu_RcT9wk-Bjj9AhKYF8FtpnCinDMA"; // ID เดิม
 const FEEDBACK_TAB_NAME = "Responses";
 
+// ⚠️ DISABLED: ฟังก์ชันนี้ถูก comment ออกเพื่อไม่ให้ชนกับ doGet() หลักใน รหัส.js
+// หากต้องการใช้หน้าแบบประเมินแยกต่างหาก ให้ deploy อีกโปรเจค
+/*
 function doGet(e) {
   return HtmlService.createTemplateFromFile('Feedback_Form')
     .evaluate()
@@ -12,6 +15,7 @@ function doGet(e) {
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
+*/
 
 function saveFeedbackData(formObject) {
   // 🛡️ Rate Limiting (Hybrid: Global + Per-Session)
