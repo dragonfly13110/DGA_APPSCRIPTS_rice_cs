@@ -526,7 +526,6 @@ MIT License - Free to use and modify for government and educational purposes.
 
 **พัฒนาโดย:**
 - ทีมพัฒนาระบบดิจิทัล สำนักงานเกษตรอำเภอราชสาส์น จังหวัดฉะเชิงเทรา
-- ร่วมกับ DGA (องค์การบริหารจัดการก๊าซเรือนกระจก)
 
 **เทคโนโลยีที่ใช้:**
 - Google Apps Script (V8 Engine)
