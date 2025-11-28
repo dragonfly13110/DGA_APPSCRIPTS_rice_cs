@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบบันทึกข้อมูลการเพาะปลูกข้าวจังหวัดฉะเชิงเทรา</title>
+
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:FILL@0..1" rel="stylesheet">
+
+  <style>
+    /* === Light Theme: Cream & Pastel Green === */
+    :root {
+      --bg: #F9F7F3;
+      /* Creamy White Background */
+      --card: #FFFFFF;
+      /* Pure White for cards */
+      --surface: #FFFFFF;
+      /* Alias for card background */
+      --brand: #609966;
+      /* Muted Pastel Green */
+      --brand-light: #E4F1E8;
+      /* Light Pastel Green for highlights/backgrounds */
+      --ink: #34495E;
+      /* Dark Slate Gray (Text) */
+      --muted: #778899;
+      /* Light Slate Gray (Muted Text) */
+      --line: #E0E6ED;
+      /* Light Gray Border */
+      --gold: #c9a227;
+      /* Kept gold for accents */
+      --danger: #e74c3c;
+      /* Standard danger red */
+      --ok: #609966;
+      /* Pastel Green for success */
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      /* Softer shadow */
+      --radius: 14px;
+      --radius-sm: 10px;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Sarabun', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Noto Sans Thai', sans-serif;
+      color: var(--ink);
+      background-color: var(--bg);
+      padding: 18px;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .app-header {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 22px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brand-light);
+      border: 1px solid var(--brand);
+      color: var(--brand);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+
+    .logo-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--gold)
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+      color: var(--ink)
+    }
+
+    .subtitle {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-weight: 400;
+      font-size: .98rem
+    }
+
+    .subtitle a {
+      color: var(--gold);
+      border-bottom-color: var(--gold)
+    }
+
+    /* Top context bar (sticky) */
+    .context-bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.85);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(8px);
+    }
+
+    .context-kv {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      color: var(--ink);
+      font-size: .95rem
+    }
+
+    .context-kv .pill {
+      background: #f1f3f5;
+      border: 1px solid #dee2e6;
+      color: var(--muted);
+      padding: 5px 10px;
+      border-radius: 999px
+    }
+
+    .context-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    /* Help drawer */
+    .help {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fdfdfd;
+    }
+
+    .help details {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      background: var(--surface)
+    }
+
+    .help summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--ink)
+    }
+
+    .help p,
+    .help ul {
+      color: var(--muted);
+      margin: .4rem 0
+    }
+
+    .help ul {
+      padding-left: 18px
+    }
+
+    .tip {
+      color: var(--brand)
+    }
+
+    /* Layout */
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    @media (max-width: 980px) {
+      .content {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+    }
+
+    .card .card-head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .card .card-title {
+      margin: 0;
+      font-size: 1.05rem
+    }
+
+    .card .card-body {
+      padding: 16px
+    }
+
+    /* Stepper */
+    .stepper {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      list-style: none;
+      padding: 0;
+      margin: 0
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px dashed #ced4da;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: .9rem;
+      background: #f8f9fa;
+    }
+
+    .step .num {
+      width: 22px;
+      height: 22px;
+      line-height: 22px;
+      text-align: center;
+      border-radius: 999px;
+      background: #e9ecef;
+      border: 1px solid #dee2e6;
+      font-weight: 700;
+      color: var(--muted)
+    }
+
+    .step.active {
+      border-style: solid;
+      border-color: var(--brand);
+      color: var(--brand)
+    }
+
+    .step.active .num {
+      background: var(--brand);
+      color: white;
+      border-color: var(--brand);
+    }
+
+    .step.done {
+      border-color: #adb5bd;
+      color: #495057
+    }
+
+    .step.done .num {
+      background: #ced4da;
+      border-color: #adb5bd;
+      color: #495057
+    }
+
+    /* Form basics */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(160px, 1fr));
+      gap: 12px
+    }
+
+    @media (max-width: 900px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    @media (max-width: 560px) {
+      .form-grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    label {
+      color: var(--ink);
+      font-weight: 700;
+      font-size: .92rem;
+      margin-bottom: 6px
+    }
+
+    select,
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: .96rem;
+      color: var(--ink);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      outline: none;
+      transition: .15s border-color, .15s box-shadow;
+    }
+
+    select:focus,
+    input:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(96, 153, 102, .2)
+    }
+
+    .helper {
+      color: var(--muted);
+      font-size: .85rem
+    }
+
+    .radio {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .radio input {
+      accent-color: var(--brand);
+      transform: scale(1.05)
+    }
+
+    /* Tambon sections */
+    .tambon-tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .tambon-section {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--surface)
+    }
+
+    .tambon-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      background: #f8f9fa;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .tambon-header h3 {
+      margin: 0;
+      font-size: 1.02rem
+    }
+
+    .fold-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px
+    }
+
+    .fold-btn:hover {
+      background: #e9ecef
+    }
+
+    .rice-entries-table {
+      display: contents
+    }
+
+    .rice-entry-header-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.4fr 1.3fr 0.5fr;
+      gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 700;
+      font-size: .82rem
+    }
+
+    .rice-entry-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.4fr 1.3fr 0.5fr;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-bottom: 1px dashed var(--line)
+    }
+
+    .rice-entry-row:last-child {
+      border-bottom: none
+    }
+
+    .rice-entry-row select,
+    .rice-entry-row input {
+      padding: 8px;
+      border-radius: 8px;
+      font-size: .92rem
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: .95rem;
+      transition: filter .15s;
+    }
+
+    .btn .material-symbols-outlined {
+      font-size: 18px
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.65;
+    }
+
+    .btn-primary {
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.08)
+    }
+
+    .btn-secondary {
+      background: #f1f3f5;
+      color: var(--ink);
+      border: 1px solid var(--line)
+    }
+
+    .btn-secondary:hover {
+      background: #e9ecef
+    }
+
+    .btn-success {
+      background: var(--ok);
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+      padding: 6px 10px;
+      font-size: .88rem
+    }
+
+    .btn-danger:hover {
+      filter: brightness(1.08)
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px dashed #adb5bd;
+      color: var(--muted)
+    }
+
+    .btn-ghost:hover {
+      background: #f8f9fa;
+      color: var(--ink)
+    }
+
+    /* Sticky action bar */
+    .action-bar {
+      position: sticky;
+      bottom: -1px;
+      z-index: 15;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      padding: 12px;
+      background: rgba(255, 255, 255, .9);
+      border-top: 1px solid var(--line)
+    }
+
+    /* Status / Toast */
+    #statusMessage {
+      display: none;
+      margin: 10px auto 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      text-align: center;
+      max-width: 860px
+    }
+
+    .status-success {
+      background: var(--brand-light);
+      color: #1E4620;
+      border: 1px solid var(--brand)
+    }
+
+    .status-error {
+      background: #FADBD8;
+      color: #78281F;
+      border: 1px solid #f1948a
+    }
+
+    .status-loading {
+      background: #FEF9E7;
+      color: #7D6608;
+      border: 1px solid #f7dc6f
+    }
+
+    /* Loader overlay */
+    .loader {
+      display: none;
+      margin: 12px auto;
+      width: 34px;
+      height: 34px;
+      border: 4px solid rgba(0, 0, 0, .1);
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin 1s linear infinite
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(52, 73, 94, 0.6);
+      z-index: 50
+    }
+
+    .modal-content {
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      width: min(850px, 92%);
+      margin: 6vh auto;
+      box-shadow: var(--shadow)
+    }
+
+    .modal-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      font-size: 1.15rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    .modal-body {
+      padding: 16px 18px;
+      max-height: 60vh;
+      overflow: auto
+    }
+
+    .modal-footer {
+      padding: 12px 18px;
+      border-top: 1px solid var(--line);
+      text-align: right
+    }
+
+    .close-button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 26px;
+      cursor: pointer
+    }
+
+    #summaryTable {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    #summaryTable th,
+    #summaryTable td {
+      border: 1px solid var(--line);
+      padding: 8px;
+      font-size: .92rem
+    }
+
+    #summaryTable th {
+      background: var(--brand-light)
+    }
+
+    /* Overview card */
+    .overview {
+      position: sticky;
+      top: 68px
+    }
+
+    .ov-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px dashed var(--line)
+    }
+
+    .ov-row:last-child {
+      border-bottom: none
+    }
+
+    .ov-key {
+      color: var(--muted)
+    }
+
+    .ov-val {
+      font-weight: 800;
+      font-size: 1.05rem
+    }
+
+    /* Search */
+    .search-wrap {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px
+    }
+
+    .search-wrap input {
+      flex: 1
+    }
+
+    /* Responsive table to cards on mobile */
+    .rice-entry-row>div:before {
+      content: attr(data-label);
+      font-weight: 700;
+      display: none;
+      margin-bottom: 4px;
+      font-size: .85rem;
+      color: var(--muted)
+    }
+
+    @media (max-width: 800px) {
+      .rice-entry-header-row {
+        display: none
+      }
+
+      .rice-entry-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .rice-entry-row>div {
+        display: flex;
+        flex-direction: column
+      }
+
+      .rice-entry-row>div:before {
+        display: block
+      }
+
+      .btn-danger {
+        justify-self: end
+      }
+    }
+
+    /* Tiny tooltip */
+    [data-tip] {
+      position: relative
+    }
+
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: calc(100% + 6px);
+      white-space: nowrap;
+      background: var(--ink);
+      color: #fff;
+      border: 1px solid var(--line);
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: .85rem;
+      z-index: 5
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ... เนื้อหา HTML ทั้งหมดของคุณจะอยู่ตรงนี้ ... -->
+  <!-- ... ไม่ต้องแก้ไขส่วน HTML เลยครับ ... -->
+
+  <div class="container">
+    <!-- Header -->
+    <div class="app-header">
+      <div class="badge"><span class="logo-dot"></span> ระบบจังหวัดฉะเชิงเทรา</div>
+      <div>
+        <h1>ระบบบันทึกข้อมูลการเพาะปลูกข้าว</h1>
+        <div class="subtitle">บันทึก/แก้ไขข้อมูลราย <b>ปักษ์ (15 / 25)</b> จัดเก็บใน GOOGLE SHEET พร้อมเชื่อมต่อแดชบอร์ด
+        </div>
+        <div class="subtitle">
+          สามารถดู Dashboard ได้ที่
+          <a href="https://lookerstudio.google.com/reporting/79d1c21b-b800-439c-86f2-261779732809" target="_blank"
+            style="font-weight:600; text-decoration:none; border-bottom:2px solid; padding-bottom:1px;">
+            (คลิก)
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sticky context bar -->
+    <div class="context-bar" id="contextBar">
+      <div class="context-kv">
+        <span class="material-symbols-outlined">event</span>
+        <div class="pill" id="ctxDate">ยังไม่เลือกวันที่</div>
+        <div class="pill" id="ctxDistrict">ยังไม่เลือกอำเภอ</div>
+      </div>
+      <div class="context-actions">
+        <button class="btn btn-ghost" id="expandAllBtn"><span
+            class="material-symbols-outlined">unfold_more</span>ขยายทุกตำบล</button>
+        <button class="btn btn-ghost" id="collapseAllBtn"><span
+            class="material-symbols-outlined">unfold_less</span>ยุบทุกตำบล</button>
+      </div>
+    </div>
+
+    <!-- Help / guidance -->
+    <div class="help">
+      <details>
+        <summary>วิธีใช้งาน & หลักเกณฑ์ข้อมูล</summary>
+        <ul>
+          <li>ข้อมูลรายงานเป็น <b>รายปักษ์</b> เลือกได้เฉพาะวันที่ <b>15</b> หรือ <b>25</b> ของเดือน</li>
+          <li>หากเลือกวันที่มีข้อมูลอยู่แล้วระบบจะดึง <b>ข้อมูลเก่าของ “วันที่และอำเภอ” นั้น</b> เมื่อกดบันทึกใหม่
+            ระบบจะลบของเก่าออก (เพื่อไม่ให้ข้อมูลซ้ำซ้อน)</li>
+          <li>กรอกได้หลายพันธุ์ข้าวต่อหนึ่งตำบล พื้นที่(ไร่) และผลผลิตต่อไร่(กก.) จะต้องเป็นค่าไม่ติดลบ</li>
+          <li class="tip">แถบด้านขวาสรุปยอดแบบเรียลไทม์: พื้นที่รวม, คาดการณ์ผลผลิตรวม (ตัน)</li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="content">
+      <!-- LEFT: form -->
+      <div>
+        <!-- Stepper -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-body">
+            <ol class="stepper" id="stepper">
+              <li class="step active" id="step-1"><span class="num">1</span> เลือกปี/เดือน/วัน</li>
+              <li class="step" id="step-2"><span class="num">2</span> เลือกอำเภอ</li>
+              <li class="step" id="step-3"><span class="num">3</span> กรอกข้อมูลตำบล</li>
+              <li class="step" id="step-4"><span class="num">4</span> ตรวจสอบ & บันทึก</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Selectors -->
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">เลือกช่วงเวลาและพื้นที่รายงาน</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div>
+                <label for="reportYear">ปี (พ.ศ.)</label>
+                <select id="reportYear"></select>
+                <div class="helper">ระบบจะคำนวณ ค.ศ. อัตโนมัติ</div>
+              </div>
+              <div>
+                <label for="reportMonth">เดือน</label>
+                <select id="reportMonth">
+                  <option value="01">มกราคม</option>
+                  <option value="02">กุมภาพันธ์</option>
+                  <option value="03">มีนาคม</option>
+                  <option value="04">เมษายน</option>
+                  <option value="05">พฤษภาคม</option>
+                  <option value="06">มิถุนายน</option>
+                  <option value="07">กรกฎาคม</option>
+                  <option value="08">สิงหาคม</option>
+                  <option value="09">กันยายน</option>
+                  <option value="10">ตุลาคม</option>
+                  <option value="11">พฤศจิกายน</option>
+                  <option value="12">ธันวาคม</option>
+                </select>
+                <div class="helper">เลือกเดือนที่ต้องการรายงาน</div>
+              </div>
+              <div>
+                <label>วันที่</label>
+                <div class="radio" data-tip="รายงานได้เฉพาะวันที่ 15 หรือ 25">
+                  <label><input type="radio" id="reportDay15" name="reportDay" value="15" checked> วันที่ 15</label>
+                  <label><input type="radio" id="reportDay25" name="reportDay" value="25"> วันที่ 25</label>
+                </div>
+              </div>
+              <div>
+                <label for="district">อำเภอ</label>
+                <select id="district">
+                  <option value="">-- เลือกอำเภอ --</option>
+                </select>
+                <div class="helper">เมื่อเลือกแล้ว ระบบจะโหลด “รายตำบล” อัตโนมัติ</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tambon data -->
+        <div id="dataEntrySection" class="card" style="display:none; margin-top:12px;">
+          <div class="card-head">
+            <h3 class="card-title" id="selectedDistrictHeader">ข้อมูลรายตำบล</h3>
+            <div class="tambon-tools">
+              <div class="search-wrap">
+                <span class="material-symbols-outlined">search</span>
+                <input id="tambonSearch" type="text" placeholder="ค้นหาชื่อตำบล...">
+              </div>
+              <button id="addAllBtn" class="btn btn-secondary"
+                data-tip="เติม 1 แถวเริ่มต้นให้ทุกตำบล (ถ้ายังว่าง)"><span
+                  class="material-symbols-outlined">add</span>เติมแถวตั้งต้น</button>
+            </div>
+          </div>
+          <div class="card-body" id="tambonDataContainer">
+            <!-- sections inserted here -->
+          </div>
+        </div>
+
+        <!-- Action bar -->
+        <div class="action-bar">
+          <button id="clearTableButton" class="btn btn-secondary"><span
+              class="material-symbols-outlined">mop</span>ล้างข้อมูลในตาราง</button>
+          <button id="validateButton" class="btn btn-primary"><span
+              class="material-symbols-outlined">task_alt</span>ตรวจสอบและเตรียมบันทึก</button>
+        </div>
+
+        <div id="statusMessage"></div>
+        <div class="loader" id="loader"></div>
+      </div>
+
+      <!-- RIGHT: overview -->
+      <aside class="overview">
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">สรุปผลแบบเรียลไทม์</h3>
+          </div>
+          <div class="card-body">
+            <div class="ov-row">
+              <div class="ov-key">จำนวนรายการที่กรอก</div>
+              <div class="ov-val" id="ovRows">0</div>
+            </div>
+            <div class="ov-row">
+              <div class="ov-key">พื้นที่รวม (ไร่)</div>
+              <div class="ov-val" id="ovArea">0.00</div>
+            </div>
+            <div class="ov-row">
+              <div class="ov-key">คาดการณ์ผลผลิต (ตัน)</div>
+              <div class="ov-val" id="ovTons">0.000</div>
+            </div>
+            <div class="ov-row">
+              <div class="ov-key">ตำบลทั้งหมด</div>
+              <div class="ov-val" id="ovTambons">0</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:10px"></div>
+        <div class="card">
+          <div class="card-head">
+            <h3 class="card-title">หลักการบันทึกเบื้องต้น</h3>
+          </div>
+          <div class="card-body">
+            <p class="helper">พื้นที่ > 0 ต้องมีผลผลิต/ไร่ &gt; 0 และตรงกันข้าม</p>
+            <p class="helper">เขตชลประทาน: “ในเขต/นอกเขต”</p>
+            <p class="helper">เดือนเก็บเกี่ยว: เลือกตามคาดการณ์</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmationModal" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>สรุปข้อมูลก่อนบันทึก</div>
+        <button class="close-button" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>วันที่รายงาน:</strong> <span id="summaryReportDate"></span></p>
+        <p><strong>อำเภอ:</strong> <span id="summaryDistrict"></span></p>
+        <div style="max-height: 40vh; overflow-y: auto;">
+          <table id="summaryTable">
+            <thead>
+              <tr>
+                <th>ตำบล</th>
+                <th>พันธุ์ข้าว</th>
+                <th>พื้นที่ (ไร่)</th>
+                <th>ผลผลิต/ไร่ (กก.)</th>
+                <th>เขตชลประทาน</th>
+                <th>เดือนเก็บเกี่ยว</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button onclick="closeModal()" class="btn btn-secondary">แก้ไขข้อมูล</button>
+        <button id="confirmSaveButton" class="btn btn-success">ยืนยันการบันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // === SESSION ID UTILITY (สำหรับ Rate Limiting) ===
+
+    /**
+     * สร้างหรือดึง Session ID จาก localStorage
+     * ใช้สำหรับ track การใช้งานของ user แต่ละคน (แม้ไม่ได้ login)
+     */
+    function getSessionId() {
+      let sessionId = localStorage.getItem('rice_app_session_id');
+      if (!sessionId) {
+        // สร้าง unique ID: timestamp + random
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('rice_app_session_id', sessionId);
+        Logger.log('✅ สร้าง Session ID ใหม่: ' + sessionId);
+      }
+      return sessionId;
+    }
+
+    // === JAVASCRIPT ไม่มีการแก้ไขใดๆ ครับ สามารถใช้ของเดิมได้เลย ===
+
+    /*** Constants & State ***/
+    const RICE_VARIETIES = ["หอมมะลิ", "ปทุมธานี", "ข้าวเจ้าอื่นๆ", "ข้าวเหนียว", "ข้าวสี", "ข้าวอินทรีย์"];
+    const DEFAULT_RICE_VARIETY = "ข้าวเจ้าอื่นๆ";
+    const IRRIGATION_OPTIONS = ["ในเขต", "นอกเขต"];
+    const MONTH_NAMES = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+
+    let districtsData = {};
+    let currentLoadedData = null;
+
+    document.addEventListener('DOMContentLoaded', initializePage);
+
+    /*** Init ***/
+    function initializePage() {
+      populateYears();
+      setEventListeners();
+      setStepper(1);
+      showLoading(true, "กำลังโหลดข้อมูลตั้งต้น...");
+
+      google.script.run
+        .withSuccessHandler(data => {
+          showLoading(false);
+          if (data && data.districts) {
+            districtsData = data.districts;
+            populateDistricts(districtsData);
+            document.getElementById('ovTambons').textContent = countAllTambons();
+          } else {
+            showError("ไม่สามารถโหลดข้อมูลอำเภอได้ หรือข้อมูลไม่ถูกต้อง");
+          }
+        })
+        .withFailureHandler(err => {
+          showLoading(false);
+          showError("เกิดข้อผิดพลาดในการโหลดข้อมูลตั้งต้น: " + (err.message || JSON.stringify(err)));
+        })
+        .getInitialData();
+
+      updateContextBar();
+      recalcTotals(); // zero
+    }
+
+    function setEventListeners() {
+      ['reportYear', 'reportMonth', 'district'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => { handleSelectionChange(); updateContextBar(); });
+      });
+      document.querySelectorAll('input[name="reportDay"]').forEach(radio => radio.addEventListener('change', () => { handleSelectionChange(); updateContextBar(); }));
+
+      document.getElementById('clearTableButton').addEventListener('click', clearTableData);
+      document.getElementById('validateButton').addEventListener('click', validateAndPrepareSave);
+      document.getElementById('confirmSaveButton').addEventListener('click', submitData);
+
+      // expand/collapse all
+      document.getElementById('expandAllBtn').addEventListener('click', () => toggleAllTambon(true));
+      document.getElementById('collapseAllBtn').addEventListener('click', () => toggleAllTambon(false));
+      document.getElementById('addAllBtn').addEventListener('click', addOneRowToAllIfEmpty);
+
+      // search filter
+      document.getElementById('tambonSearch').addEventListener('input', filterTambon);
+    }
+
+    /*** Helpers ***/
+    function populateYears() {
+      const yearSelect = document.getElementById('reportYear');
+      const currentYearBE = new Date().getFullYear() + 543;
+      for (let i = currentYearBE - 2; i <= currentYearBE + 2; i++) {
+        const option = document.createElement('option'); option.value = i; option.textContent = i; yearSelect.appendChild(option);
+      }
+      yearSelect.value = currentYearBE;
+    }
+    function populateDistricts(data) {
+      const districtSelect = document.getElementById('district');
+      districtSelect.innerHTML = '<option value="">-- เลือกอำเภอ --</option>';
+      Object.keys(data).sort().forEach(districtName => {
+        const option = document.createElement('option'); option.value = districtName; option.textContent = districtName; districtSelect.appendChild(option);
+      });
+    }
+    function countAllTambons() {
+      if (!districtsData) return 0;
+      let c = 0; Object.values(districtsData).forEach(arr => c += arr.length);
+      return c;
+    }
+
+    function getSelectedReportDateDetails() {
+      const yearBE = document.getElementById('reportYear').value;
+      const month = document.getElementById('reportMonth').value; // 01-12
+      const day = document.querySelector('input[name="reportDay"]:checked').value; // 15 or 25
+      const district = document.getElementById('district').value;
+
+      if (!yearBE || !month || !day || !district) return null;
+
+      const yearCE = parseInt(yearBE) - 543;
+      const reportDateString = `${yearCE}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+
+      return { yearBE, yearCE, month: month.padStart(2, '0'), day: day.padStart(2, '0'), district, reportDateString };
+    }
+
+    function updateContextBar() {
+      const d = getSelectedReportDateDetails();
+      document.getElementById('ctxDate').textContent = d ? `${d.day}/${d.month}/${d.yearBE}` : 'ยังไม่เลือกวันที่';
+      document.getElementById('ctxDistrict').textContent = d ? `อำเภอ: ${d.district}` : 'ยังไม่เลือกอำเภอ';
+    }
+
+    function setStepper(step) {
+      [1, 2, 3, 4].forEach(n => {
+        const el = document.getElementById(`step-${n}`);
+        el.classList.remove('active', 'done');
+        if (n < step) el.classList.add('done');
+        else if (n === step) el.classList.add('active');
+      });
+    }
+
+    /*** Core flows ***/
+    function handleSelectionChange() {
+      const details = getSelectedReportDateDetails();
+
+      document.getElementById('dataEntrySection').style.display = 'none';
+      document.getElementById('tambonDataContainer').innerHTML = '';
+      currentLoadedData = null;
+
+      setStepper(details ? 2 : 1);
+
+      if (details && details.district !== "") {
+        document.getElementById('dataEntrySection').style.display = 'block';
+        document.getElementById('selectedDistrictHeader').textContent = `ข้อมูลรายตำบล: ${details.district}`;
+        fetchAndDisplayData(details.reportDateString, details.district);
+        setStepper(3);
+      }
+    }
+
+    function fetchAndDisplayData(reportDate, district) {
+      if (!reportDate || !district || district === "") {
+        showError("ข้อมูลวันที่หรืออำเภอไม่ถูกต้อง (เป็นค่าว่าง) ไม่สามารถโหลดข้อมูลได้");
+        buildTambonTables(district || "", []);
+        return;
+      }
+      showLoading(true, "กำลังโหลดข้อมูล...");
+      google.script.run
+        .withSuccessHandler(response => {
+          showLoading(false);
+          if (response.error) {
+            showError("ข้อผิดพลาดในการโหลดข้อมูล: " + response.error);
+            currentLoadedData = null;
+            buildTambonTables(district, []);
+          } else if (response.success && response.data) {
+            currentLoadedData = response.data;
+            buildTambonTables(district, response.data);
+            showStatus("โหลดข้อมูลสำเร็จ (" + response.data.length + " รายการ)", "success");
+            setTimeout(() => showStatus("", false), 4000);
+            recalcTotals();
+          } else {
+            showError("ไม่สามารถประมวลผลข้อมูลที่ได้รับจาก Server (loadData)");
+            currentLoadedData = null;
+            buildTambonTables(district, []);
+          }
+        })
+        .withFailureHandler(err => {
+          showLoading(false);
+          showError("เกิดข้อผิดพลาดในการสื่อสารกับ Server (loadData): " + (err.message || JSON.stringify(err)));
+          currentLoadedData = null;
+          buildTambonTables(district, []);
+        })
+        .loadData(reportDate, district);
+    }
+
+    function buildTambonTables(selectedDistrict, loadedData = []) {
+      const container = document.getElementById('tambonDataContainer');
+      container.innerHTML = '';
+
+      if (!districtsData || Object.keys(districtsData).length === 0) {
+        showError("ข้อมูลอำเภอ-ตำบลยังไม่ถูกโหลด โปรดรอสักครู่หรือรีเฟรชหน้าเว็บ");
+        return;
+      }
+      const tambons = districtsData[selectedDistrict];
+      if (!tambons) {
+        if (selectedDistrict) showError("ไม่พบข้อมูลตำบลสำหรับอำเภอ: " + selectedDistrict);
+        return;
+      }
+
+      tambons.forEach(tambonName => {
+        const tambonSection = document.createElement('section');
+        tambonSection.className = 'tambon-section';
+        tambonSection.setAttribute('data-tambon-name', tambonName);
+
+        // header
+        const tambonHeaderDiv = document.createElement('div');
+        tambonHeaderDiv.className = 'tambon-header';
+
+        const nameHeader = document.createElement('h3');
+        nameHeader.textContent = tambonName;
+
+        const headerBtns = document.createElement('div');
+        const foldBtn = document.createElement('button');
+        foldBtn.className = 'fold-btn'; foldBtn.innerHTML = '<span class="material-symbols-outlined">unfold_less</span>'; foldBtn.title = 'ยุบ/ขยาย';
+        headerBtns.appendChild(foldBtn);
+
+        const addButton = document.createElement('button');
+        addButton.innerHTML = '<span class="material-symbols-outlined">add</span> เพิ่มรายการพันธุ์ข้าว';
+        addButton.className = 'btn btn-secondary btn-add-variety'; addButton.type = 'button';
+        headerBtns.appendChild(addButton);
+
+        tambonHeaderDiv.appendChild(nameHeader);
+        tambonHeaderDiv.appendChild(headerBtns);
+        tambonSection.appendChild(tambonHeaderDiv);
+
+        // table wrapper
+        const tableWrapper = document.createElement('div');
+        tableWrapper.className = 'rice-entries-table';
+
+        const headerRow = document.createElement('div');
+        headerRow.className = 'rice-entry-header-row';
+        headerRow.innerHTML = `
+          <div>พันธุ์ข้าว</div>
+          <div>พื้นที่ (ไร่)</div>
+          <div>ผลผลิต/ไร่ (กก.)</div>
+          <div>เขตชลประทาน</div>
+          <div>เดือนเก็บเกี่ยว</div>
+          <div></div>
+        `;
+        tableWrapper.appendChild(headerRow);
+
+        const entriesContainer = document.createElement('div');
+        entriesContainer.className = 'rice-entries-container';
+        tableWrapper.appendChild(entriesContainer);
+
+        // events
+        addButton.onclick = () => { addRiceEntryRow(entriesContainer, tambonName); recalcTotals(); };
+        foldBtn.onclick = () => {
+          const isHidden = entriesContainer.style.display === 'none';
+          entriesContainer.style.display = isHidden ? '' : 'none';
+          headerRow.style.display = isHidden ? '' : 'none';
+          foldBtn.innerHTML = `<span class="material-symbols-outlined">${isHidden ? 'unfold_less' : 'unfold_more'}</span>`;
+        };
+
+        tambonSection.appendChild(tableWrapper);
+        container.appendChild(tambonSection);
+
+        // preload
+        const tambonSpecificData = (loadedData || []).filter(d => d.tambon === tambonName);
+        if (tambonSpecificData.length > 0) {
+          tambonSpecificData.forEach(dataRow => addRiceEntryRow(entriesContainer, tambonName, dataRow));
+        } else {
+          addRiceEntryRow(entriesContainer, tambonName);
+        }
+      });
+
+      recalcTotals();
+      setStepper(3);
+    }
+
+    function addRiceEntryRow(container, tambonName, dataRow = null) {
+      const row = document.createElement('div'); row.className = 'rice-entry-row'; row.setAttribute('data-tambon', tambonName);
+
+      const varietyDiv = document.createElement('div'); varietyDiv.setAttribute('data-label', 'พันธุ์ข้าว:');
+      const varietySelect = document.createElement('select'); varietySelect.className = 'rice-variety';
+      RICE_VARIETIES.forEach(v => { const opt = document.createElement('option'); opt.value = v; opt.textContent = v; varietySelect.appendChild(opt); });
+      varietySelect.value = (dataRow && dataRow.variety) ? dataRow.variety : DEFAULT_RICE_VARIETY;
+      varietyDiv.appendChild(varietySelect); row.appendChild(varietyDiv);
+
+      const areaDiv = document.createElement('div'); areaDiv.setAttribute('data-label', 'พื้นที่ (ไร่):');
+      const areaInput = document.createElement('input'); areaInput.type = 'number'; areaInput.className = 'cultivation-area'; areaInput.placeholder = '0.00'; areaInput.min = "0"; areaInput.step = "0.01";
+      const areaVal = dataRow ? parseFloat(dataRow.area) : NaN;
+      areaInput.value = !isNaN(areaVal) ? areaVal.toFixed(2) : "";
+      areaInput.addEventListener('input', recalcTotals);
+      areaDiv.appendChild(areaInput); row.appendChild(areaDiv);
+
+      const yieldDiv = document.createElement('div'); yieldDiv.setAttribute('data-label', 'ผลผลิต/ไร่ (กก.):');
+      const yieldInput = document.createElement('input'); yieldInput.type = 'number'; yieldInput.className = 'yield-per-rai'; yieldInput.placeholder = '0.00'; yieldInput.min = "0"; yieldInput.step = "0.01";
+      const yieldVal = dataRow ? parseFloat(dataRow.yieldPerRai) : NaN;
+      yieldInput.value = !isNaN(yieldVal) ? yieldVal.toFixed(2) : "";
+      yieldInput.addEventListener('input', recalcTotals);
+      yieldDiv.appendChild(yieldInput); row.appendChild(yieldDiv);
+
+      const irrigationDiv = document.createElement('div'); irrigationDiv.setAttribute('data-label', 'เขตชลประทาน:');
+      const irrigationSelect = document.createElement('select'); irrigationSelect.className = 'irrigation-zone';
+      IRRIGATION_OPTIONS.forEach(optText => { const opt = document.createElement('option'); opt.value = optText; opt.textContent = optText; irrigationSelect.appendChild(opt); });
+      if (dataRow && dataRow.irrigation) irrigationSelect.value = dataRow.irrigation; else irrigationSelect.value = IRRIGATION_OPTIONS[0];
+      irrigationDiv.appendChild(irrigationSelect); row.appendChild(irrigationDiv);
+
+      const harvestDiv = document.createElement('div'); harvestDiv.setAttribute('data-label', 'เดือนเก็บเกี่ยว:');
+      const harvestMonthSelect = document.createElement('select'); harvestMonthSelect.className = 'harvest-month';
+      MONTH_NAMES.forEach((monthName) => { const opt = document.createElement('option'); opt.value = monthName; opt.textContent = monthName; harvestMonthSelect.appendChild(opt); });
+      harvestMonthSelect.value = (dataRow && dataRow.harvestMonth) ? dataRow.harvestMonth : MONTH_NAMES[new Date().getMonth()];
+      harvestDiv.appendChild(harvestMonthSelect); row.appendChild(harvestDiv);
+
+      const deleteDiv = document.createElement('div'); deleteDiv.style.textAlign = "center";
+      const deleteButton = document.createElement('button'); deleteButton.innerHTML = '<span class="material-symbols-outlined">delete</span>'; deleteButton.className = 'btn btn-danger btn-delete-row'; deleteButton.type = 'button';
+      deleteButton.onclick = () => {
+        const parentContainer = row.parentElement;
+        row.remove();
+        if (parentContainer && parentContainer.childElementCount === 0) {
+          addRiceEntryRow(parentContainer, tambonName);
+        }
+        recalcTotals();
+      };
+      deleteDiv.appendChild(deleteButton); row.appendChild(deleteDiv);
+
+      container.appendChild(row);
+    }
+
+    function filterTambon() {
+      const q = document.getElementById('tambonSearch').value.trim();
+      const sections = document.querySelectorAll('.tambon-section');
+      sections.forEach(sec => {
+        const name = sec.getAttribute('data-tambon-name') || '';
+        sec.style.display = name.indexOf(q) >= 0 ? '' : 'none';
+      });
+    }
+
+    function toggleAllTambon(expand = true) {
+      document.querySelectorAll('.tambon-section').forEach(sec => {
+        const headerRow = sec.querySelector('.rice-entry-header-row');
+        const cont = sec.querySelector('.rice-entries-container');
+        const btn = sec.querySelector('.fold-btn');
+        if (expand) { cont.style.display = ''; headerRow.style.display = ''; btn.innerHTML = '<span class="material-symbols-outlined">unfold_less</span>'; }
+        else { cont.style.display = 'none'; headerRow.style.display = 'none'; btn.innerHTML = '<span class="material-symbols-outlined">unfold_more</span>'; }
+      });
+    }
+
+    function addOneRowToAllIfEmpty() {
+      document.querySelectorAll('.rice-entries-container').forEach(cont => {
+        if (cont.childElementCount === 0) { const tName = cont.closest('.tambon-section').getAttribute('data-tambon-name'); addRiceEntryRow(cont, tName); }
+      });
+      recalcTotals();
+      showStatus("เติมแถวตั้งต้นให้ตำบลที่ยังว่างแล้ว", "success");
+      setTimeout(() => showStatus("", false), 2500);
+    }
+
+    /*** Clear / Validate / Save ***/
+    function clearTableData() {
+      const details = getSelectedReportDateDetails();
+      if (details && details.district !== "") {
+        showStatus("กำลังล้างข้อมูลและโหลดตารางใหม่...", "loading");
+        fetchAndDisplayData(details.reportDateString, details.district);
+      } else {
+        document.getElementById('tambonDataContainer').innerHTML = '';
+        recalcTotals();
+        showStatus("ล้างข้อมูลในตารางแล้ว (กรุณาเลือกอำเภอเพื่อโหลดข้อมูล)", "success");
+        setTimeout(() => showStatus("", false), 3000);
+      }
+    }
+
+    function validateAndPrepareSave() {
+      showStatus("", false);
+      const details = getSelectedReportDateDetails();
+
+      if (!details) {
+        showError("กรุณาเลือกปี เดือน วันที่ และอำเภอให้ครบถ้วน");
+        return;
+      }
+
+      const entries = [];
+      let isValid = true;
+      let hasActualDataToSave = false;
+
+      document.querySelectorAll('.tambon-section').forEach(tambonSection => {
+        if (!isValid) return;
+        const tambonName = tambonSection.getAttribute('data-tambon-name');
+        tambonSection.querySelectorAll('.rice-entry-row').forEach((row, index) => {
+          if (!isValid) return;
+          const variety = row.querySelector('.rice-variety').value;
+          const areaStr = row.querySelector('.cultivation-area').value;
+          const yieldPerRaiStr = row.querySelector('.yield-per-rai').value;
+
+          if (variety) {
+            const area = parseFloat(areaStr) || 0;
+            const yieldPerRai = parseFloat(yieldPerRaiStr) || 0;
+
+            if (areaStr.trim() !== '' && (isNaN(parseFloat(areaStr)) || parseFloat(areaStr) < 0)) {
+              showError(`[${tambonName}] แถวที่ ${index + 1}: พื้นที่ฯ ต้องเป็นตัวเลขไม่ติดลบ`); isValid = false; return;
+            }
+            if (yieldPerRaiStr.trim() !== '' && (isNaN(parseFloat(yieldPerRaiStr)) || parseFloat(yieldPerRaiStr) < 0)) {
+              showError(`[${tambonName}] แถวที่ ${index + 1}: ผลผลิต/ไร่ฯ ต้องเป็นตัวเลขไม่ติดลบ`); isValid = false; return;
+            }
+            if (area > 0 && yieldPerRai <= 0) {
+              showError(`[${tambonName}] แถวที่ ${index + 1}: หากมีพื้นที่เพาะปลูก (${area.toFixed(2)} ไร่) ผลผลิตต่อไร่ฯ ต้องมากกว่า 0`); isValid = false; return;
+            }
+            if (yieldPerRai > 0 && area <= 0) {
+              showError(`[${tambonName}] แถวที่ ${index + 1}: หากมีผลผลิตต่อไร่ (${yieldPerRai.toFixed(2)} กก.) พื้นที่เพาะปลูกฯ ต้องมากกว่า 0`); isValid = false; return;
+            }
+
+            entries.push({
+              tambon: tambonName, variety: variety, area: area.toFixed(2),
+              yieldPerRai: yieldPerRai.toFixed(2), irrigation: row.querySelector('.irrigation-zone').value,
+              harvestMonth: row.querySelector('.harvest-month').value
+            });
+            if (area > 0 && yieldPerRai > 0) hasActualDataToSave = true;
+          } else if (areaStr.trim() !== '' || yieldPerRaiStr.trim() !== '') {
+            showError(`[${tambonName}] แถวที่ ${index + 1}: กรุณาเลือกพันธุ์ข้าว หากมีการระบุพื้นที่ฯ หรือ ผลผลิต/ไร่ฯ`); isValid = false; return;
+          }
+        });
+      });
+
+      if (!isValid) return;
+
+      // Summary modal
+      document.getElementById('summaryReportDate').textContent = `${details.day}/${details.month}/${details.yearBE}`;
+      document.getElementById('summaryDistrict').textContent = details.district;
+      const summaryTableBody = document.getElementById('summaryTableBody');
+      summaryTableBody.innerHTML = '';
+
+      if (entries.length === 0 || !hasActualDataToSave) {
+        const r = summaryTableBody.insertRow(); const cell = r.insertCell();
+        cell.colSpan = 6; cell.textContent = "ไม่มีข้อมูลที่จะบันทึก (ข้อมูลเก่าใน Sheet สำหรับวันที่และอำเภอนี้จะถูกลบ)";
+        cell.style.textAlign = "center"; cell.style.fontStyle = "italic";
+      } else {
+        entries.forEach(entry => {
+          const currentArea = parseFloat(entry.area);
+          const currentYield = parseFloat(entry.yieldPerRai);
+          if (currentArea > 0 && currentYield > 0) {
+            const r = summaryTableBody.insertRow();
+            r.insertCell().textContent = entry.tambon; r.insertCell().textContent = entry.variety;
+            r.insertCell().textContent = currentArea.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            r.insertCell().textContent = currentYield.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            r.insertCell().textContent = entry.irrigation; r.insertCell().textContent = entry.harvestMonth;
+          }
+        });
+        if (summaryTableBody.rows.length === 0) {
+          const r = summaryTableBody.insertRow(); const cell = r.insertCell();
+          cell.colSpan = 6; cell.textContent = "ไม่มีข้อมูลที่สมบูรณ์ที่จะบันทึก (ข้อมูลเก่าใน Sheet สำหรับวันที่และอำเภอนี้จะถูกลบ)";
+          cell.style.textAlign = "center"; cell.style.fontStyle = "italic";
+        }
+      }
+      document.getElementById('confirmationModal').style.display = 'block';
+      setStepper(4);
+    }
+
+    function closeModal() { document.getElementById('confirmationModal').style.display = 'none'; }
+
+    function submitData() {
+      if (document.getElementById('confirmationModal').style.display === 'block') closeModal();
+
+      const details = getSelectedReportDateDetails();
+      if (!details) { showError("ข้อมูลวันที่หรืออำเภอสำหรับบันทึกไม่ถูกต้อง"); return; }
+
+      showLoading(true, "กำลังบันทึกข้อมูล...");
+
+      const entriesToSubmit = [];
+      document.querySelectorAll('.tambon-section').forEach(tambonSection => {
+        tambonSection.querySelectorAll('.rice-entry-row').forEach(row => {
+          const variety = row.querySelector('.rice-variety').value;
+          if (variety) {
+            const area = parseFloat(row.querySelector('.cultivation-area').value) || 0;
+            const yieldVal = parseFloat(row.querySelector('.yield-per-rai').value) || 0;
+            entriesToSubmit.push({
+              tambon: tambonSection.getAttribute('data-tambon-name'), variety: variety,
+              area: area.toFixed(2), yieldPerRai: yieldVal.toFixed(2),
+              irrigation: row.querySelector('.irrigation-zone').value,
+              harvestMonth: row.querySelector('.harvest-month').value
+            });
+          }
+        });
+      });
+
+      const payload = {
+        sessionId: getSessionId(), // 🛡️ สำหรับ Rate Limiting
+        reportDate: details.reportDateString,
+        district: details.district,
+        entries: entriesToSubmit
+      };
+
+      google.script.run
+        .withSuccessHandler(response => {
+          showLoading(false);
+          if (response.error) {
+            showError("ข้อผิดพลาดในการบันทึก: " + response.error);
+          } else {
+            showStatus(response.message || "บันทึกข้อมูลสำเร็จ!", "success");
+            fetchAndDisplayData(details.reportDateString, details.district);
+            setStepper(3);
+          }
+        })
+        .withFailureHandler(err => {
+          showLoading(false);
+          showError("เกิดข้อผิดพลาดในการสื่อสารกับ Server (saveData): " + (err.message || JSON.stringify(err)));
+        })
+        .saveData(payload);
+    }
+
+    /*** UX helpers ***/
+    function showLoading(isLoading, message = "กำลังโหลด...") {
+      const loader = document.getElementById('loader');
+      const statusMsg = document.getElementById('statusMessage');
+      const interactiveElements = document.querySelectorAll('.btn, button, select, input');
+
+      if (isLoading) {
+        loader.style.display = 'block';
+        statusMsg.textContent = message;
+        statusMsg.className = 'status-loading';
+        statusMsg.style.display = 'block';
+        interactiveElements.forEach(el => el.disabled = true);
+      } else {
+        loader.style.display = 'none';
+        interactiveElements.forEach(el => el.disabled = false);
+      }
+    }
+    function showStatus(message, type = "success") {
+      const statusMsg = document.getElementById('statusMessage'); statusMsg.textContent = message;
+      if (message) { statusMsg.className = `status-${type}`; statusMsg.style.display = 'block'; }
+      else { statusMsg.style.display = 'none'; }
+    }
+    function showError(message) { showStatus(message, "error"); }
+
+    // Live overview
+    function recalcTotals() {
+      let rows = 0, area = 0, tons = 0;
+      document.querySelectorAll('.rice-entry-row').forEach(row => {
+        const a = parseFloat(row.querySelector('.cultivation-area')?.value || '0');
+        const y = parseFloat(row.querySelector('.yield-per-rai')?.value || '0');
+        if (!isNaN(a) || !isNaN(y)) rows++;
+        if (a > 0) area += a;
+        if (a > 0 && y > 0) tons += (a * y) / 1000; // (ไร่ * กก./ไร่) = กก. -> ตัน
+      });
+      document.getElementById('ovRows').textContent = rows.toLocaleString();
+      document.getElementById('ovArea').textContent = area.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('ovTons').textContent = tons.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+    }
+  </script>
+</body>
+
+</html>

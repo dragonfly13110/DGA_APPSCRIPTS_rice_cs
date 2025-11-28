@@ -1,0 +1,29 @@
+# Google Apps Script Files
+.clasp.json
+.claspignore
+
+# API Keys and Sensitive Data
+*.env
+.env.local
+credentials.json
+
+# Node modules
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

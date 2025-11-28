@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แบบสอบถามความพึงพอใจ</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #609966;
+      /* เขียวพาสเทลเข้ม */
+      --primary-light: #E4F1E8;
+      /* เขียวพาสเทลอ่อน */
+      --bg: #F9F7F3;
+      /* ครีมรองพื้น */
+      --text: #34495E;
+      /* สีตัวอักษรเข้ม */
+      --star-inactive: #E0E6ED;
+      /* ดาวสีเทา */
+      --star-active: #F1C40F;
+      /* ดาวสีเหลือง */
+    }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: var(--bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      padding: 20px;
+    }
+
+    /* Card Container */
+    .card {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 520px;
+      padding: 40px 30px;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    /* Headers */
+    .emoji-header {
+      font-size: 48px;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    h2 {
+      margin: 0 0 8px 0;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 1.5rem;
+    }
+
+    p.subtitle {
+      color: #7f8c8d;
+      font-size: 0.95rem;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    /* Rating Section Box */
+    .rating-group {
+      background: #FAFAFA;
+      border: 1px dashed #E0E6ED;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .rating-label {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    /* Stars Logic */
+    .star-container {
+      display: flex;
+      justify-content: center;
+      flex-direction: row-reverse;
+      /* Trick for hover effect */
+      gap: 10px;
+    }
+
+    .star-container input {
+      display: none;
+    }
+
+    .star-container label {
+      font-size: 32px;
+      color: var(--star-inactive);
+      cursor: pointer;
+      transition: transform 0.2s, color 0.2s;
+    }
+
+    /* Interactive Effects */
+    .star-container input:checked~label,
+    .star-container label:hover,
+    .star-container label:hover~label {
+      color: var(--star-active);
+    }
+
+    .star-container label:hover {
+      transform: scale(1.2);
+    }
+
+    /* Form Inputs */
+    .form-section {
+      text-align: left;
+      margin-top: 30px;
+    }
+
+    label.input-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #F0F0F0;
+      border-radius: 12px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 1rem;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+      background: #fff;
+    }
+
+    select:focus,
+    textarea:focus {
+      border-color: var(--primary);
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(96, 153, 102, 0.3);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background: #BDC3C7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Success Card (Hidden by default) */
+    .success-card {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .success-icon {
+      font-size: 80px;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text);
+      border: 2px solid #E0E6ED;
+    }
+
+    .btn-secondary:hover {
+      background: #F9F9F9;
+      box-shadow: none;
+      border-color: #BDC3C7;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="card" id="formCard">
+    <span class="emoji-header">📊</span>
+    <h2>ประเมินความพึงพอใจ</h2>
+    <p class="subtitle">ระบบ Dashboard สถานการณ์ข้าว จ.ฉะเชิงเทรา<br>ความเห็นของท่านช่วยให้เราพัฒนาได้ดียิ่งขึ้น</p>
+
+    <form id="feedbackForm" onsubmit="submitForm(event)">
+
+      <div class="rating-group">
+        <div class="rating-label"><span class="material-icons" style="color:#E67E22;">palette</span> ความสวยงาม/อ่านง่าย
+        </div>
+        <div class="star-container">
+          <input type="radio" name="rating_design" id="d5" value="5" required><label for="d5"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_design" id="d4" value="4"><label for="d4" class="material-icons">star</label>
+          <input type="radio" name="rating_design" id="d3" value="3"><label for="d3" class="material-icons">star</label>
+          <input type="radio" name="rating_design" id="d2" value="2"><label for="d2" class="material-icons">star</label>
+          <input type="radio" name="rating_design" id="d1" value="1"><label for="d1" class="material-icons">star</label>
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <div class="rating-label"><span class="material-icons" style="color:#3498DB;">touch_app</span>
+          ความง่ายในการใช้งาน</div>
+        <div class="star-container">
+          <input type="radio" name="rating_usability" id="u5" value="5" required><label for="u5"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_usability" id="u4" value="4"><label for="u4"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_usability" id="u3" value="3"><label for="u3"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_usability" id="u2" value="2"><label for="u2"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_usability" id="u1" value="1"><label for="u1"
+            class="material-icons">star</label>
+        </div>
+      </div>
+
+      <div class="rating-group">
+        <div class="rating-label"><span class="material-icons" style="color:#9B59B6;">insights</span> ประโยชน์ของข้อมูล
+        </div>
+        <div class="star-container">
+          <input type="radio" name="rating_utility" id="k5" value="5" required><label for="k5"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_utility" id="k4" value="4"><label for="k4"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_utility" id="k3" value="3"><label for="k3"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_utility" id="k2" value="2"><label for="k2"
+            class="material-icons">star</label>
+          <input type="radio" name="rating_utility" id="k1" value="1"><label for="k1"
+            class="material-icons">star</label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <label class="input-label">ข้อมูลผู้ใช้งาน (Optional)</label>
+        <select name="userType" id="userTypeSelect" style="margin-bottom: 12px;">
+          <option value="" disabled selected>-- ท่านคือใคร? --</option>
+          <option value="เจ้าหน้าที่เกษตร">เจ้าหน้าที่เกษตร</option>
+          <option value="ผู้บริหาร">ผู้บริหารหน่วยงาน</option>
+          <option value="เกษตรกร">เกษตรกร</option>
+          <option value="ประชาชนทั่วไป">ประชาชนทั่วไป</option>
+        </select>
+
+        <textarea name="comment" id="commentText" rows="3"
+          placeholder="มีข้อเสนอแนะเพิ่มเติมไหมครับ? (เช่น อยากเห็นข้อมูลอะไรเพิ่ม)"></textarea>
+      </div>
+
+      <button type="submit" class="btn" id="submitBtn">
+        ส่งข้อมูลประเมิน <span class="material-icons">send</span>
+      </button>
+    </form>
+  </div>
+
+  <div class="card success-card" id="successCard">
+    <div class="success-icon material-icons">check_circle_outline</div>
+    <h2>ขอบคุณมากครับ!</h2>
+    <p class="subtitle">ข้อมูลของท่านถูกบันทึกเรียบร้อยแล้ว<br>ทีมงาน "เป็ดน้อยร้อยหน้าที่" จะนำไปปรับปรุงระบบต่อไป ❤️
+    </p>
+
+    <button class="btn btn-secondary" onclick="resetForm()">
+      <span class="material-icons">refresh</span> ส่งข้อมูลอีกครั้ง
+    </button>
+  </div>
+
+  <script>
+    // === SESSION ID UTILITY (สำหรับ Rate Limiting) ===
+    function getSessionId() {
+      let sessionId = localStorage.getItem('feedback_app_session_id');
+      if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
+        localStorage.setItem('feedback_app_session_id', sessionId);
+      }
+      return sessionId;
+    }
+
+    // ฟังก์ชันส่งข้อมูล
+    function submitForm(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('submitBtn');
+      const originalBtnText = btn.innerHTML;
+
+      // ล็อกปุ่มและหมุนติ้วๆ
+      btn.disabled = true;
+      btn.innerHTML = '<span class="material-icons" style="animation:spin 1s linear infinite">sync</span> กำลังบันทึก...';
+
+      // เก็บค่าจากฟอร์ม
+      const formData = {
+        sessionId: getSessionId(), // 🛡️ สำหรับ Rate Limiting
+        rating_design: document.querySelector('input[name="rating_design"]:checked').value,
+        rating_usability: document.querySelector('input[name="rating_usability"]:checked').value,
+        rating_utility: document.querySelector('input[name="rating_utility"]:checked').value,
+        userType: document.getElementById('userTypeSelect').value || "ไม่ระบุ",
+        comment: document.getElementById('commentText').value
+      };
+
+      // ส่งไปหลังบ้าน (Apps Script)
+      google.script.run
+        .withSuccessHandler((response) => {
+          if (response && response.error) {
+            // แสดง error จาก rate limiting
+            alert(response.error);
+            btn.disabled = false;
+            btn.innerHTML = originalBtnText;
+          } else {
+            // ซ่อนฟอร์ม -> โชว์หน้าขอบคุณ
+            document.getElementById('formCard').style.display = 'none';
+            document.getElementById('successCard').style.display = 'flex';
+          }
+        })
+        .withFailureHandler((err) => {
+          alert('เกิดข้อผิดพลาด: ' + err);
+          // คืนค่าปุ่มหาก Error
+          btn.disabled = false;
+          btn.innerHTML = originalBtnText;
+        })
+        .saveFeedbackData(formData);
+    }
+
+    // 🚀 ฟังก์ชันรีเซ็ตหน้าจอ (Instant Reset)
+    function resetForm() {
+      // 1. ซ่อนหน้าขอบคุณ -> โชว์หน้าฟอร์ม
+      document.getElementById('successCard').style.display = 'none';
+      document.getElementById('formCard').style.display = 'block';
+
+      // 2. ล้างข้อมูลในฟอร์ม (Form Reset)
+      document.getElementById('feedbackForm').reset();
+
+      // 3. คืนสภาพปุ่มส่ง (Reset Button State)
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = false;
+      btn.innerHTML = 'ส่งข้อมูลประเมิน <span class="material-icons">send</span>';
+    }
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <style>
+      body { 
+        font-family: 'Sarabun', sans-serif; 
+        background-color: #f4f6f9; 
+        margin: 0; 
+        padding: 20px; 
+        color: #333; 
+        display: flex;
+        justify-content: center;
+      }
+
+      .container { 
+        width: 100%;
+        max-width: 1100px;
+        background: white; 
+        padding: 40px; 
+        border-radius: 16px; 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+        display: flex;
+        flex-direction: column;
+        min-height: 80vh; 
+      }
+      
+      .header { 
+        display: flex; 
+        align-items: flex-start; 
+        gap: 20px; 
+        border-bottom: 2px solid #ecf0f1; 
+        padding-bottom: 20px; 
+        margin-bottom: 25px; 
+      }
+      
+      .ai-avatar {
+        font-size: 50px;
+        background: #e8f5e9;
+        color: #2ecc71;
+        padding: 15px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .header-text { flex: 1; }
+
+      h1 { 
+        margin: 0 0 5px 0; 
+        font-size: 24px; 
+        color: #2c3e50; 
+        font-weight: 700;
+        line-height: 1.4;
+      }
+
+      .sub-header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        font-size: 14px;
+        color: #7f8c8d;
+      }
+
+      .gemini-badge {
+        background: linear-gradient(135deg, #4285f4, #9b59b6);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .timestamp { 
+        color: #e67e22; 
+        font-weight: 600;
+        font-size: 15px; 
+        background: #fff3e0;
+        padding: 4px 10px;
+        border-radius: 8px;
+      }
+      
+      /* ✅ ปรับแต่งการแสดงผล Markdown ให้สวยงาม */
+      .content-box { 
+        font-size: 18px; 
+        line-height: 1.8; 
+        color: #2d3436;
+        flex-grow: 1; 
+      }
+      
+      /* หัวข้อในเนื้อหา */
+      .content-box h1, .content-box h2, .content-box h3 {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        color: #2c3e50;
+        font-weight: 700;
+      }
+      .content-box h3 { font-size: 1.2em; border-left: 4px solid #3498db; padding-left: 10px; }
+      
+      /* ตัวหนา */
+      .content-box strong { color: #e67e22; font-weight: 700; }
+      
+      /* รายการจุด (Bullet points) */
+      .content-box ul { margin-bottom: 1em; padding-left: 20px; }
+      .content-box li { margin-bottom: 0.5em; }
+
+      .loading { text-align: center; color: #7f8c8d; margin-top: 50px; font-size: 18px; }
+
+      .footer-remark {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px dashed #bdc3c7;
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 14px;
+        font-style: italic;
+      }
+
+      @media (max-width: 600px) {
+        .container { padding: 20px; }
+        h1 { font-size: 20px; }
+        .header { flex-direction: column; gap: 10px; text-align: center; align-items: center; }
+        .sub-header { justify-content: center; }
+        .ai-avatar { margin-bottom: 10px; }
+        .content-box { font-size: 16px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="ai-avatar">
+          <span class="material-icons" style="font-size: 40px;">smart_toy</span>
+        </div>
+        <div class="header-text">
+          <h1>รายงานสถานการณ์การเพาะปลูกข้าว จ.ฉะเชิงเทรา (ฤดูนาปี 2568/69)</h1>
+          
+          <div class="sub-header">
+            <span class="gemini-badge">
+              <span class="material-icons" style="font-size: 14px;">bolt</span> 
+              วิเคราะห์โดย Google Gemini 2.5 Pro
+            </span>
+            <span id="timeDisplay" class="timestamp">รอสักครู่...</span>
+          </div>
+        </div>
+      </div>
+      
+      <div id="reportContent" class="content-box">
+        <div class="loading">
+          <span class="material-icons" style="font-size: 48px; animation: spin 2s linear infinite;">sync</span><br><br>
+          กำลังเชื่อมต่อดาวเทียมและฐานข้อมูลอัจฉริยะ...
+        </div>
+      </div>
+      
+      <div class="footer-remark">
+        *หมายเหตุ: ระบบทำการวิเคราะห์และสรุปรายงานอัตโนมัติทุกวัน เวลา 09.00 น.
+      </div>
+    </div>
+
+    <script>
+      const style = document.createElement('style');
+      style.innerHTML = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+      document.head.appendChild(style);
+
+      window.onload = function() {
+        google.script.run.withSuccessHandler(showData).getLatestAIReport();
+      };
+
+      function showData(data) {
+        document.getElementById('timeDisplay').innerText = "📅 ประจำวันที่: " + data.time;
+        
+        // ✅ ใช้ marked.parse() แปลงรหัส ### เป็นหัวข้อสวยๆ ทันที
+        document.getElementById('reportContent').innerHTML = marked.parse(data.text);
+      }
+    </script>
+  </body>
+</html>
