@@ -47,6 +47,14 @@ function doGet(e) {
         .setTitle("รายงานสถานการณ์ข้าวอัจฉริยะ (AI Insight)")
         .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 
+    case 'docs':
+      // 📚 หน้าคู่มือการใช้งาน
+      return HtmlService.createTemplateFromFile('Docs_View')
+        .evaluate()
+        .setTitle("คู่มือการใช้งาน - ระบบบันทึกข้อมูลข้าว")
+        .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+        .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+
     case 'feedback':
       // 📝 หน้าแบบประเมิน
       return HtmlService.createTemplateFromFile('Feedback_Form')
