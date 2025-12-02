@@ -219,3 +219,132 @@ function saveToSheet(text) {
 function getThaiMonth() {
   return ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."][new Date().getMonth()];
 }
+
+// ============================================
+// 📄 ฟังก์ชันสำหรับ Web Interface (AI_View.html)
+// ============================================
+
+// ดึงรายงาน AI ล่าสุด
+function getLatestAIReport() {
+  const ss = SpreadsheetApp.openById(SS_ID);
+  const sheet = ss.getSheetByName("AI_Insight");
+  
+  if (!sheet || sheet.getLastRow() < 2) {
+    return {
+      time: "ไม่มีข้อมูล",
+      text: "ยังไม่มีรายงานในระบบ กรุณารอการวิเคราะห์อัตโนมัติในรอบถัดไป"
+    };
+  }
+  
+  // ดึงข้อมูลจากแถวที่ 2 (แถวล่าสุดหลังจาก insertRowAfter(1))
+  const data = sheet.getRange(2, 1, 1, 2).getValues()[0];
+  const timestamp = data[0];
+  const reportText = data[1];
+  
+  return {
+    time: Utilities.formatDate(new Date(timestamp), "Asia/Bangkok", "d MMMM yyyy, HH:mm น.", "th_TH"),
+    text: reportText || "ไม่มีข้อมูล"
+  };
+}
+
+// ดึงรายการวันที่ที่มีรายงาน (14 วันย้อนหลัง)
+function getAvailableDates(days = 14) {
+  const ss = SpreadsheetApp.openById(SS_ID);
+  const sheet = ss.getSheetByName("AI_Insight");
+  
+  if (!sheet || sheet.getLastRow() < 2) {
+    return [];
+  }
+  
+  const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 1); // Column A (Time)
+  const timestamps = dataRange.getValues();
+  
+  const now = new Date();
+  const cutoffDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+  
+  const availableDates = [];
+  const seenDates = new Set();
+  
+  for (let i = 0; i < timestamps.length; i++) {
+    const timestamp = new Date(timestamps[i][0]);
+    
+    if (timestamp >= cutoffDate && timestamp <= now) {
+      const dateKey = Utilities.formatDate(timestamp, "Asia/Bangkok", "yyyy-MM-dd");
+      
+      // เก็บเฉพาะวันที่ไม่ซ้ำ (ใช้วันล่าสุดของแต่ละวัน)
+      if (!seenDates.has(dateKey)) {
+        seenDates.add(dateKey);
+        
+        availableDates.push({
+          displayText: formatThaiDate(timestamp),
+          isoDate: dateKey,
+          timestamp: timestamp.getTime()
+        });
+      }
+    }
+  }
+  
+  // เรียงจากใหม่ไปเก่า
+  availableDates.sort((a, b) => b.timestamp - a.timestamp);
+  
+  return availableDates;
+}
+
+// ดึงรายงานตามวันที่ที่เลือก
+function getReportByDate(dateString) {
+  const ss = SpreadsheetApp.openById(SS_ID);
+  const sheet = ss.getSheetByName("AI_Insight");
+  
+  if (!sheet || sheet.getLastRow() < 2) {
+    return {
+      time: "ไม่มีข้อมูล",
+      text: "ไม่พบรายงานในวันที่เลือก"
+    };
+  }
+  
+  const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2);
+  const data = dataRange.getValues();
+  
+  // แปลง dateString เป็น Date object
+  const targetDate = new Date(dateString);
+  const targetDateStr = Utilities.formatDate(targetDate, "Asia/Bangkok", "yyyy-MM-dd");
+  
+  // หารายงานล่าสุดของวันนั้น
+  let foundReport = null;
+  
+  for (let i = 0; i < data.length; i++) {
+    const timestamp = new Date(data[i][0]);
+    const recordDateStr = Utilities.formatDate(timestamp, "Asia/Bangkok", "yyyy-MM-dd");
+    
+    if (recordDateStr === targetDateStr) {
+      // เก็บรายงานล่าสุดของวันนั้น (ข้อมูลเรียงจากใหม่ไปเก่า)
+      if (!foundReport) {
+        foundReport = {
+          time: Utilities.formatDate(timestamp, "Asia/Bangkok", "d MMMM yyyy, HH:mm น.", "th_TH"),
+          text: data[i][1] || "ไม่มีข้อมูล"
+        };
+        break; // หยุดทันทีเมื่อเจอรายงานแรก (ล่าสุด)
+      }
+    }
+  }
+  
+  if (!foundReport) {
+    return {
+      time: "ไม่มีข้อมูล",
+      text: "ไม่พบรายงานในวันที่ " + formatThaiDate(targetDate)
+    };
+  }
+  
+  return foundReport;
+}
+
+// ฟังก์ชันช่วยแปลงวันที่เป็นภาษาไทย
+function formatThaiDate(date) {
+  const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+  const d = new Date(date);
+  const day = d.getDate();
+  const month = thaiMonths[d.getMonth()];
+  const year = d.getFullYear() + 543; // แปลงเป็น พ.ศ.
+  
+  return `${day} ${month} ${year}`;
+}
