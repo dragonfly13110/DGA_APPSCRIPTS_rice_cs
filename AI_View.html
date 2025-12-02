@@ -1,272 +1,428 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <base target="_top">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    
-    <style>
-      body { 
-        font-family: 'Sarabun', sans-serif; 
-        background-color: #f4f6f9; 
-        margin: 0; 
-        padding: 20px; 
-        color: #333; 
-        display: flex;
-        justify-content: center;
+
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      min-height: 80vh;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      border-bottom: 2px solid #ecf0f1;
+      padding-bottom: 20px;
+      margin-bottom: 25px;
+    }
+
+    .ai-avatar {
+      font-size: 50px;
+      background: #e8f5e9;
+      color: #2ecc71;
+      padding: 15px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-text {
+      flex: 1;
+    }
+
+    h1 {
+      margin: 0 0 5px 0;
+      font-size: 24px;
+      color: #2c3e50;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .sub-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+
+    .gemini-badge {
+      background: linear-gradient(135deg, #4285f4, #9b59b6);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .timestamp {
+      color: #e67e22;
+      font-weight: 600;
+      font-size: 15px;
+      background: #fff3e0;
+      padding: 4px 10px;
+      border-radius: 8px;
+    }
+
+    /* ✅ ปรับแต่งการแสดงผล Markdown ให้สวยงาม */
+    .content-box {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #2d3436;
+      flex-grow: 1;
+    }
+
+    /* หัวข้อในเนื้อหา */
+    .content-box h1,
+    .content-box h2,
+    .content-box h3 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+      color: #2c3e50;
+      font-weight: 700;
+    }
+
+    .content-box h3 {
+      font-size: 1.2em;
+      border-left: 4px solid #3498db;
+      padding-left: 10px;
+    }
+
+    /* ตัวหนา */
+    .content-box strong {
+      color: #e67e22;
+      font-weight: 700;
+    }
+
+    /* รายการจุด (Bullet points) */
+    .content-box ul {
+      margin-bottom: 1em;
+      padding-left: 20px;
+    }
+
+    .content-box li {
+      margin-bottom: 0.5em;
+    }
+
+    .loading {
+      text-align: center;
+      color: #7f8c8d;
+      margin-top: 50px;
+      font-size: 18px;
+    }
+
+    /* Date Selector */
+    .date-selector {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      border: 2px solid #e3f2fd;
+    }
+
+    .date-selector label {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 15px;
+    }
+
+    .date-selector select {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 15px;
+      border: 2px solid #dfe6e9;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: 'Sarabun', sans-serif;
+      color: #2c3e50;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .date-selector select:hover {
+      border-color: #3498db;
+    }
+
+    .date-selector select:focus {
+      outline: none;
+      border-color: #2980b9;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .refresh-btn {
+      padding: 10px 18px;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s ease;
+      font-family: 'Sarabun', sans-serif;
+    }
+
+    .refresh-btn:hover {
+      background: linear-gradient(135deg, #2980b9, #2573a7);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .refresh-btn:active {
+      transform: translateY(0);
+    }
+
+    .history-badge {
+      background: #e67e22;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
       }
 
-      .container { 
-        width: 100%;
-        max-width: 1100px;
-        background: white; 
-        padding: 40px; 
-        border-radius: 16px; 
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-        display: flex;
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    /* Quick Links Section */
+    .quick-links {
+      margin-top: 30px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      border: 1px solid #dee2e6;
+    }
+
+    .quick-links h3 {
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      color: #2c3e50;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .links-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 12px;
+    }
+
+    .link-card {
+      background: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      border: 1px solid #e9ecef;
+      font-size: 14px;
+    }
+
+    .link-card:hover {
+      background: #3498db;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+      border-color: #3498db;
+    }
+
+    .link-card .icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .link-card:hover .icon {
+      transform: scale(1.1);
+    }
+
+    .footer-remark {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px dashed #bdc3c7;
+      text-align: center;
+      color: #7f8c8d;
+      font-size: 14px;
+      font-style: italic;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      .header {
         flex-direction: column;
-        min-height: 80vh; 
-      }
-      
-      .header { 
-        display: flex; 
-        align-items: flex-start; 
-        gap: 20px; 
-        border-bottom: 2px solid #ecf0f1; 
-        padding-bottom: 20px; 
-        margin-bottom: 25px; 
-      }
-      
-      .ai-avatar {
-        font-size: 50px;
-        background: #e8f5e9;
-        color: #2ecc71;
-        padding: 15px;
-        border-radius: 50%;
-        display: flex;
+        gap: 10px;
+        text-align: center;
         align-items: center;
-        justify-content: center;
-      }
-
-      .header-text { flex: 1; }
-
-      h1 { 
-        margin: 0 0 5px 0; 
-        font-size: 24px; 
-        color: #2c3e50; 
-        font-weight: 700;
-        line-height: 1.4;
       }
 
       .sub-header {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        align-items: center;
-        font-size: 14px;
-        color: #7f8c8d;
+        justify-content: center;
       }
 
-      .gemini-badge {
-        background: linear-gradient(135deg, #4285f4, #9b59b6);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 12px;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
+      .ai-avatar {
+        margin-bottom: 10px;
       }
 
-      .timestamp { 
-        color: #e67e22; 
-        font-weight: 600;
-        font-size: 15px; 
-        background: #fff3e0;
-        padding: 4px 10px;
-        border-radius: 8px;
+      .content-box {
+        font-size: 16px;
       }
-      
-      /* ✅ ปรับแต่งการแสดงผล Markdown ให้สวยงาม */
-      .content-box { 
-        font-size: 18px; 
-        line-height: 1.8; 
-        color: #2d3436;
-        flex-grow: 1; 
-      }
-      
-      /* หัวข้อในเนื้อหา */
-      .content-box h1, .content-box h2, .content-box h3 {
-        margin-top: 1.5em;
-        margin-bottom: 0.5em;
-        color: #2c3e50;
-        font-weight: 700;
-      }
-      .content-box h3 { font-size: 1.2em; border-left: 4px solid #3498db; padding-left: 10px; }
-      
-      /* ตัวหนา */
-      .content-box strong { color: #e67e22; font-weight: 700; }
-      
-      /* รายการจุด (Bullet points) */
-      .content-box ul { margin-bottom: 1em; padding-left: 20px; }
-      .content-box li { margin-bottom: 0.5em; }
 
-      .loading { text-align: center; color: #7f8c8d; margin-top: 50px; font-size: 18px; }
-
-      /* Date Selector */
       .date-selector {
-        background: #f8f9fa;
-        padding: 15px 20px;
-        border-radius: 12px;
-        margin-bottom: 25px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        border: 2px solid #e3f2fd;
-      }
-
-      .date-selector label {
-        font-weight: 600;
-        color: #2c3e50;
-        font-size: 15px;
+        flex-direction: column;
+        align-items: stretch;
       }
 
       .date-selector select {
-        flex: 1;
-        min-width: 200px;
-        padding: 10px 15px;
-        border: 2px solid #dfe6e9;
-        border-radius: 8px;
+        min-width: 100%;
+      }
+
+      .links-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-links h3 {
         font-size: 15px;
-        font-family: 'Sarabun', sans-serif;
-        color: #2c3e50;
-        background: white;
-        cursor: pointer;
-        transition: all 0.3s ease;
       }
+    }
+  </style>
+</head>
 
-      .date-selector select:hover {
-        border-color: #3498db;
-      }
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="ai-avatar">
+        <span class="material-icons" style="font-size: 40px;">smart_toy</span>
+      </div>
+      <div class="header-text">
+        <h1>รายงานสถานการณ์การเพาะปลูกข้าว จ.ฉะเชิงเทรา (ฤดูนาปี 2568/69)</h1>
 
-      .date-selector select:focus {
-        outline: none;
-        border-color: #2980b9;
-        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-      }
-
-      .refresh-btn {
-        padding: 10px 18px;
-        background: linear-gradient(135deg, #3498db, #2980b9);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-size: 14px;
-        cursor: pointer;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        transition: all 0.3s ease;
-        font-family: 'Sarabun', sans-serif;
-      }
-
-      .refresh-btn:hover {
-        background: linear-gradient(135deg, #2980b9, #2573a7);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-      }
-
-      .refresh-btn:active {
-        transform: translateY(0);
-      }
-
-      .history-badge {
-        background: #e67e22;
-        color: white;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 12px;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        animation: pulse 2s ease-in-out infinite;
-      }
-
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-      }
-
-      .footer-remark {
-        margin-top: 40px;
-        padding-top: 20px;
-        border-top: 1px dashed #bdc3c7;
-        text-align: center;
-        color: #7f8c8d;
-        font-size: 14px;
-        font-style: italic;
-      }
-
-      @media (max-width: 600px) {
-        .container { padding: 20px; }
-        h1 { font-size: 20px; }
-        .header { flex-direction: column; gap: 10px; text-align: center; align-items: center; }
-        .sub-header { justify-content: center; }
-        .ai-avatar { margin-bottom: 10px; }
-        .content-box { font-size: 16px; }
-        .date-selector { flex-direction: column; align-items: stretch; }
-        .date-selector select { min-width: 100%; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <div class="header">
-        <div class="ai-avatar">
-          <span class="material-icons" style="font-size: 40px;">smart_toy</span>
-        </div>
-        <div class="header-text">
-          <h1>รายงานสถานการณ์การเพาะปลูกข้าว จ.ฉะเชิงเทรา (ฤดูนาปี 2568/69)</h1>
-          
-          <div class="sub-header">
-            <span class="gemini-badge">
-              <span class="material-icons" style="font-size: 14px;">bolt</span> 
-              วิเคราะห์โดย Google Gemini 2.5 Pro
-            </span>
-            <span id="timeDisplay" class="timestamp">รอสักครู่...</span>
-            <span id="historyBadge" class="history-badge" style="display: none;">
-              <span class="material-icons" style="font-size: 12px;">history</span>
-              รายงานย้อนหลัง
-            </span>
-          </div>
+        <div class="sub-header">
+          <span class="gemini-badge">
+            <span class="material-icons" style="font-size: 14px;">bolt</span>
+            วิเคราะห์โดย Google Gemini 2.5 Pro
+          </span>
+          <span id="timeDisplay" class="timestamp">รอสักครู่...</span>
+          <span id="historyBadge" class="history-badge" style="display: none;">
+            <span class="material-icons" style="font-size: 12px;">history</span>
+            รายงานย้อนหลัง
+          </span>
         </div>
       </div>
-      
-      <!-- Date Selector -->
-      <div class="date-selector">
-        <label for="dateSelect">📅 เลือกดูรายงาน:</label>
-        <select id="dateSelect" onchange="loadReport()">
-          <option value="latest">วันนี้ (ล่าสุด)</option>
-        </select>
-        <button onclick="refreshDates()" class="refresh-btn">
-          <span class="material-icons" style="font-size: 18px;">refresh</span>
-          รีเฟรช
-        </button>
+    </div>
+
+    <!-- Date Selector -->
+    <div class="date-selector">
+      <label for="dateSelect">📅 เลือกดูรายงาน:</label>
+      <select id="dateSelect" onchange="loadReport()">
+        <option value="latest">วันนี้ (ล่าสุด)</option>
+      </select>
+      <button onclick="refreshDates()" class="refresh-btn">
+        <span class="material-icons" style="font-size: 18px;">refresh</span>
+        รีเฟรช
+      </button>
+    </div>
+
+    <div id="reportContent" class="content-box">
+      <div class="loading">
+        <span class="material-icons" style="font-size: 48px; animation: spin 2s linear infinite;">sync</span><br><br>
+        กำลังเชื่อมต่อดาวเทียมและฐานข้อมูลอัจฉริยะ...
       </div>
-      
-      <div id="reportContent" class="content-box">
-        <div class="loading">
-          <span class="material-icons" style="font-size: 48px; animation: spin 2s linear infinite;">sync</span><br><br>
-          กำลังเชื่อมต่อดาวเทียมและฐานข้อมูลอัจฉริยะ...
+
+      <!-- Quick Links Section -->
+      <div class="quick-links">
+        <h3>
+          <span class="material-icons" style="font-size: 20px;">link</span>
+          ข้อมูลที่เป็นประโยชน์
+        </h3>
+        <div class="links-grid">
+          <a href="https://www.price.moc.go.th/price/agriculture/บ้าน" target="_blank" class="link-card">
+            <span class="icon">📊</span>
+            <span>ราคาข้าวเปลือกรายวัน</span>
+          </a>
+          <a href="https://www.tmd.go.th/province/province.php?id=25" target="_blank" class="link-card">
+            <span class="icon">🌦️</span>
+            <span>พยากรณ์อากาศจ.ฉะเชิงเทรา</span>
+          </a>
+          <a href="https://www.ricethailand.go.th/rkb3/index.php" target="_blank" class="link-card">
+            <span class="icon">🌾</span>
+            <span>ข่าวข้าว (กรมการข้าว)</span>
+          </a>
+          <a href="https://nvoc.rid.go.th/" target="_blank" class="link-card">
+            <span class="icon">💧</span>
+            <span>สถานการณ์น้ำ</span>
+          </a>
+          <a href="https://omap.doae.go.th/login.php" target="_blank" class="link-card">
+            <span class="icon">🗺️</span>
+            <span>ระบบจัดการข้อมูลเกษตรกร</span>
+          </a>
+          <a href="https://www.facebook.com/KasetChachoengsao" target="_blank" class="link-card">
+            <span class="icon">📱</span>
+            <span>ติดต่อเจ้าหน้าที่ (Facebook)</span>
+          </a>
         </div>
       </div>
-      
+
       <div class="footer-remark">
         *หมายเหตุ: ระบบทำการวิเคราะห์และสรุปรายงานอัตโนมัติทุกวัน เวลา 09.00 น.
       </div>
@@ -279,7 +435,7 @@
 
       let availableDates = [];
 
-      window.onload = function() {
+      window.onload = function () {
         loadAvailableDates();
         loadLatestReport();
       };
@@ -287,7 +443,7 @@
       // โหลดรายการวันที่ที่มีรายงาน
       function loadAvailableDates() {
         google.script.run
-          .withSuccessHandler(function(dates) {
+          .withSuccessHandler(function (dates) {
             availableDates = dates;
             populateDateSelector(dates);
           })
@@ -297,14 +453,14 @@
       // เติมข้อมูลใน dropdown
       function populateDateSelector(dates) {
         const select = document.getElementById('dateSelect');
-        
+
         // ล้างตัวเลือกเก่า (เว้น "วันนี้")
         while (select.options.length > 1) {
           select.remove(1);
         }
-        
+
         // เพิ่มตัวเลือกวันที่
-        dates.forEach(function(dateObj) {
+        dates.forEach(function (dateObj) {
           const option = document.createElement('option');
           option.value = dateObj.isoDate;
           option.textContent = dateObj.displayText;
@@ -316,7 +472,7 @@
       function loadLatestReport() {
         showLoading();
         google.script.run
-          .withSuccessHandler(function(data) {
+          .withSuccessHandler(function (data) {
             showData(data, false);
           })
           .getLatestAIReport();
@@ -326,13 +482,13 @@
       function loadReport() {
         const select = document.getElementById('dateSelect');
         const selectedDate = select.value;
-        
+
         if (selectedDate === 'latest') {
           loadLatestReport();
         } else {
           showLoading();
           google.script.run
-            .withSuccessHandler(function(data) {
+            .withSuccessHandler(function (data) {
               showData(data, true);
             })
             .getReportByDate(selectedDate);
@@ -359,7 +515,7 @@
       // แสดงข้อมูลรายงาน
       function showData(data, isHistorical) {
         document.getElementById('timeDisplay').innerText = "📅 ประจำวันที่: " + data.time;
-        
+
         // แสดง/ซ่อน badge "รายงานย้อนหลัง"
         const historyBadge = document.getElementById('historyBadge');
         if (isHistorical) {
@@ -367,10 +523,11 @@
         } else {
           historyBadge.style.display = 'none';
         }
-        
+
         // ✅ ใช้ marked.parse() แปลงรหัส ### เป็นหัวข้อสวยๆ ทันที
         document.getElementById('reportContent').innerHTML = marked.parse(data.text);
       }
     </script>
-  </body>
+</body>
+
 </html>
