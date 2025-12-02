@@ -388,146 +388,147 @@
         <span class="material-icons" style="font-size: 48px; animation: spin 2s linear infinite;">sync</span><br><br>
         กำลังเชื่อมต่อดาวเทียมและฐานข้อมูลอัจฉริยะ...
       </div>
+    </div>
 
-      <!-- Quick Links Section -->
-      <div class="quick-links">
-        <h3>
-          <span class="material-icons" style="font-size: 20px;">link</span>
-          ข้อมูลที่เป็นประโยชน์
-        </h3>
-        <div class="links-grid">
-          <a href="https://www.price.moc.go.th/price/agriculture/บ้าน" target="_blank" class="link-card">
-            <span class="icon">📊</span>
-            <span>ราคาข้าวเปลือกรายวัน</span>
-          </a>
-          <a href="https://www.tmd.go.th/province/province.php?id=25" target="_blank" class="link-card">
-            <span class="icon">🌦️</span>
-            <span>พยากรณ์อากาศจ.ฉะเชิงเทรา</span>
-          </a>
-          <a href="https://www.ricethailand.go.th/rkb3/index.php" target="_blank" class="link-card">
-            <span class="icon">🌾</span>
-            <span>ข่าวข้าว (กรมการข้าว)</span>
-          </a>
-          <a href="https://nvoc.rid.go.th/" target="_blank" class="link-card">
-            <span class="icon">💧</span>
-            <span>สถานการณ์น้ำ</span>
-          </a>
-          <a href="https://omap.doae.go.th/login.php" target="_blank" class="link-card">
-            <span class="icon">🗺️</span>
-            <span>ระบบจัดการข้อมูลเกษตรกร</span>
-          </a>
-          <a href="https://www.facebook.com/KasetChachoengsao" target="_blank" class="link-card">
-            <span class="icon">📱</span>
-            <span>ติดต่อเจ้าหน้าที่ (Facebook)</span>
-          </a>
-        </div>
-      </div>
-
-      <div class="footer-remark">
-        *หมายเหตุ: ระบบทำการวิเคราะห์และสรุปรายงานอัตโนมัติทุกวัน เวลา 09.00 น.
+    <!-- Quick Links Section -->
+    <div class="quick-links">
+      <h3>
+        <span class="material-icons" style="font-size: 20px;">link</span>
+        ข้อมูลที่เป็นประโยชน์
+      </h3>
+      <div class="links-grid">
+        <a href="https://www.price.moc.go.th/price/agriculture/บ้าน" target="_blank" class="link-card">
+          <span class="icon">📊</span>
+          <span>ราคาข้าวเปลือกรายวัน</span>
+        </a>
+        <a href="https://www.tmd.go.th/province/province.php?id=25" target="_blank" class="link-card">
+          <span class="icon">🌦️</span>
+          <span>พยากรณ์อากาศจ.ฉะเชิงเทรา</span>
+        </a>
+        <a href="https://www.ricethailand.go.th/rkb3/index.php" target="_blank" class="link-card">
+          <span class="icon">🌾</span>
+          <span>ข่าวข้าว (กรมการข้าว)</span>
+        </a>
+        <a href="https://nvoc.rid.go.th/" target="_blank" class="link-card">
+          <span class="icon">💧</span>
+          <span>สถานการณ์น้ำ</span>
+        </a>
+        <a href="https://omap.doae.go.th/login.php" target="_blank" class="link-card">
+          <span class="icon">🗺️</span>
+          <span>ระบบจัดการข้อมูลเกษตรกร</span>
+        </a>
+        <a href="https://www.facebook.com/KasetChachoengsao" target="_blank" class="link-card">
+          <span class="icon">📱</span>
+          <span>ติดต่อเจ้าหน้าที่ (Facebook)</span>
+        </a>
       </div>
     </div>
 
-    <script>
-      const style = document.createElement('style');
-      style.innerHTML = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
-      document.head.appendChild(style);
+    <div class="footer-remark">
+      *หมายเหตุ: ระบบทำการวิเคราะห์และสรุปรายงานอัตโนมัติทุกวัน เวลา 09.00 น.
+    </div>
+  </div>
 
-      let availableDates = [];
+  <script>
+    const style = document.createElement('style');
+    style.innerHTML = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+    document.head.appendChild(style);
 
-      window.onload = function () {
-        loadAvailableDates();
+    let availableDates = [];
+
+    window.onload = function () {
+      loadAvailableDates();
+      loadLatestReport();
+    };
+
+    // โหลดรายการวันที่ที่มีรายงาน
+    function loadAvailableDates() {
+      google.script.run
+        .withSuccessHandler(function (dates) {
+          availableDates = dates;
+          populateDateSelector(dates);
+        })
+        .getAvailableDates(14);
+    }
+
+    // เติมข้อมูลใน dropdown
+    function populateDateSelector(dates) {
+      const select = document.getElementById('dateSelect');
+
+      // ล้างตัวเลือกเก่า (เว้น "วันนี้")
+      while (select.options.length > 1) {
+        select.remove(1);
+      }
+
+      // เพิ่มตัวเลือกวันที่
+      dates.forEach(function (dateObj) {
+        const option = document.createElement('option');
+        option.value = dateObj.isoDate;
+        option.textContent = dateObj.displayText;
+        select.appendChild(option);
+      });
+    }
+
+    // โหลดรายงานล่าสุด
+    function loadLatestReport() {
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function (data) {
+          showData(data, false);
+        })
+        .getLatestAIReport();
+    }
+
+    // โหลดรายงานตามวันที่ที่เลือก
+    function loadReport() {
+      const select = document.getElementById('dateSelect');
+      const selectedDate = select.value;
+
+      if (selectedDate === 'latest') {
         loadLatestReport();
-      };
-
-      // โหลดรายการวันที่ที่มีรายงาน
-      function loadAvailableDates() {
-        google.script.run
-          .withSuccessHandler(function (dates) {
-            availableDates = dates;
-            populateDateSelector(dates);
-          })
-          .getAvailableDates(14);
-      }
-
-      // เติมข้อมูลใน dropdown
-      function populateDateSelector(dates) {
-        const select = document.getElementById('dateSelect');
-
-        // ล้างตัวเลือกเก่า (เว้น "วันนี้")
-        while (select.options.length > 1) {
-          select.remove(1);
-        }
-
-        // เพิ่มตัวเลือกวันที่
-        dates.forEach(function (dateObj) {
-          const option = document.createElement('option');
-          option.value = dateObj.isoDate;
-          option.textContent = dateObj.displayText;
-          select.appendChild(option);
-        });
-      }
-
-      // โหลดรายงานล่าสุด
-      function loadLatestReport() {
+      } else {
         showLoading();
         google.script.run
           .withSuccessHandler(function (data) {
-            showData(data, false);
+            showData(data, true);
           })
-          .getLatestAIReport();
+          .getReportByDate(selectedDate);
       }
+    }
 
-      // โหลดรายงานตามวันที่ที่เลือก
-      function loadReport() {
-        const select = document.getElementById('dateSelect');
-        const selectedDate = select.value;
+    // รีเฟรชรายการวันที่
+    function refreshDates() {
+      loadAvailableDates();
+      loadLatestReport();
+      document.getElementById('dateSelect').value = 'latest';
+    }
 
-        if (selectedDate === 'latest') {
-          loadLatestReport();
-        } else {
-          showLoading();
-          google.script.run
-            .withSuccessHandler(function (data) {
-              showData(data, true);
-            })
-            .getReportByDate(selectedDate);
-        }
-      }
-
-      // รีเฟรชรายการวันที่
-      function refreshDates() {
-        loadAvailableDates();
-        loadLatestReport();
-        document.getElementById('dateSelect').value = 'latest';
-      }
-
-      // แสดง loading
-      function showLoading() {
-        document.getElementById('reportContent').innerHTML = `
+    // แสดง loading
+    function showLoading() {
+      document.getElementById('reportContent').innerHTML = `
           <div class="loading">
             <span class="material-icons" style="font-size: 48px; animation: spin 2s linear infinite;">sync</span><br><br>
             กำลังโหลดรายงาน...
           </div>
         `;
+    }
+
+    // แสดงข้อมูลรายงาน
+    function showData(data, isHistorical) {
+      document.getElementById('timeDisplay').innerText = "📅 ประจำวันที่: " + data.time;
+
+      // แสดง/ซ่อน badge "รายงานย้อนหลัง"
+      const historyBadge = document.getElementById('historyBadge');
+      if (isHistorical) {
+        historyBadge.style.display = 'inline-flex';
+      } else {
+        historyBadge.style.display = 'none';
       }
 
-      // แสดงข้อมูลรายงาน
-      function showData(data, isHistorical) {
-        document.getElementById('timeDisplay').innerText = "📅 ประจำวันที่: " + data.time;
-
-        // แสดง/ซ่อน badge "รายงานย้อนหลัง"
-        const historyBadge = document.getElementById('historyBadge');
-        if (isHistorical) {
-          historyBadge.style.display = 'inline-flex';
-        } else {
-          historyBadge.style.display = 'none';
-        }
-
-        // ✅ ใช้ marked.parse() แปลงรหัส ### เป็นหัวข้อสวยๆ ทันที
-        document.getElementById('reportContent').innerHTML = marked.parse(data.text);
-      }
-    </script>
+      // ✅ ใช้ marked.parse() แปลงรหัส ### เป็นหัวข้อสวยๆ ทันที
+      document.getElementById('reportContent').innerHTML = marked.parse(data.text);
+    }
+  </script>
 </body>
 
 </html>
