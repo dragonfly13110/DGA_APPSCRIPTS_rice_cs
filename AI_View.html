@@ -485,6 +485,9 @@
         .withSuccessHandler(function (data) {
           showData(data, false);
         })
+        .withFailureHandler(function (error) {
+          showError(error);
+        })
         .getLatestAIReport();
     }
 
@@ -501,8 +504,21 @@
           .withSuccessHandler(function (data) {
             showData(data, true);
           })
+          .withFailureHandler(function (error) {
+            showError(error);
+          })
           .getReportByDate(selectedDate);
       }
+    }
+
+    function showError(error) {
+      document.getElementById('reportContent').innerHTML = `
+        <div style="text-align: center; color: #e74c3c; margin-top: 50px;">
+          <span class="material-icons" style="font-size: 48px;">error_outline</span><br><br>
+          เกิดข้อผิดพลาดในการโหลดข้อมูล<br>
+          <small>${error.message || error}</small>
+        </div>
+      `;
     }
 
     // รีเฟรชรายการวันที่
