@@ -305,9 +305,9 @@ function getReportByDate(dateString) {
   const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2);
   const data = dataRange.getValues();
 
-  // แปลง dateString เป็น Date object
-  const targetDate = new Date(dateString);
-  const targetDateStr = Utilities.formatDate(targetDate, "Asia/Bangkok", "yyyy-MM-dd");
+  // ใช้ dateString (yyyy-MM-dd) ที่ส่งมาจาก Frontend ได้เลย เพราะมันถูก format มาจาก getAvailableDates แล้ว
+  // การแปลงกลับไปกลับมาอาจทำให้เกิดปัญหา Timezone Shift
+  const targetDateStr = dateString;
 
   // หารายงานล่าสุดของวันนั้น
   let foundReport = null;
@@ -319,6 +319,7 @@ function getReportByDate(dateString) {
       const timestamp = new Date(data[i][0]);
       if (isNaN(timestamp.getTime())) continue; // ข้ามวันที่ไม่ถูกต้อง
 
+      // แปลงวันที่ใน Sheet เป็น yyyy-MM-dd (Asia/Bangkok) เพื่อเทียบ
       const recordDateStr = Utilities.formatDate(timestamp, "Asia/Bangkok", "yyyy-MM-dd");
 
       if (recordDateStr === targetDateStr) {
@@ -338,22 +339,31 @@ function getReportByDate(dateString) {
   }
 
   if (!foundReport) {
+    // พยายามแปลง dateString กลับเป็นวันที่เพื่อแสดงใน Error Message
+    let displayDate = dateString;
+    try {
+      const d = new Date(dateString);
+      displayDate = formatThaiDate(d);
+    } catch (e) { }
+
     return {
       time: "ไม่มีข้อมูล",
-      text: "ไม่พบรายงานในวันที่ " + formatThaiDate(targetDate)
+      text: "ไม่พบรายงานในวันที่ " + displayDate + " (ค้นหา: " + targetDateStr + ")"
     };
   }
 
   return foundReport;
 }
 
-// ฟังก์ชันช่วยแปลงวันที่เป็นภาษาไทย
+// ฟังก์ชันช่วยแปลงวันที่เป็นภาษาไทย (Timezone Aware)
 function formatThaiDate(date) {
   const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-  const d = new Date(date);
-  const day = d.getDate();
-  const month = thaiMonths[d.getMonth()];
-  const year = d.getFullYear() + 543; // แปลงเป็น พ.ศ.
 
-  return `${day} ${month} ${year}`;
+  // ใช้ Utilities.formatDate เพื่อให้ได้วัน/เดือน/ปี ตาม Timezone ของไทยแน่นอน
+  const d = new Date(date);
+  const day = parseInt(Utilities.formatDate(d, "Asia/Bangkok", "d"));
+  const monthIdx = parseInt(Utilities.formatDate(d, "Asia/Bangkok", "M")) - 1;
+  const year = parseInt(Utilities.formatDate(d, "Asia/Bangkok", "yyyy")) + 543;
+
+  return `${day} ${thaiMonths[monthIdx]} ${year}`;
 }
