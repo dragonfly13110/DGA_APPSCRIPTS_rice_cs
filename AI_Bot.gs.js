@@ -266,21 +266,32 @@ function getAvailableDates(days = 14) {
   const seenDates = new Set();
 
   for (let i = 0; i < timestamps.length; i++) {
-    const timestamp = new Date(timestamps[i][0]);
+    try {
+      if (!timestamps[i][0]) continue;
 
-    if (timestamp >= cutoffDate && timestamp <= now) {
-      const dateKey = Utilities.formatDate(timestamp, "Asia/Bangkok", "yyyy-MM-dd");
+      const timestamp = new Date(timestamps[i][0]);
+      if (isNaN(timestamp.getTime())) continue;
 
-      // เก็บเฉพาะวันที่ไม่ซ้ำ (ใช้วันล่าสุดของแต่ละวัน)
-      if (!seenDates.has(dateKey)) {
-        seenDates.add(dateKey);
+      if (timestamp >= cutoffDate && timestamp <= now) {
+        // สร้าง dateKey จาก Asia/Bangkok timezone
+        const dateKey = Utilities.formatDate(timestamp, "Asia/Bangkok", "yyyy-MM-dd");
 
-        availableDates.push({
-          displayText: formatThaiDate(timestamp),
-          isoDate: dateKey,
-          timestamp: timestamp.getTime()
-        });
+        // เก็บเฉพาะวันที่ไม่ซ้ำ (ใช้วันล่าสุดของแต่ละวัน)
+        if (!seenDates.has(dateKey)) {
+          seenDates.add(dateKey);
+
+          availableDates.push({
+            displayText: formatThaiDateFromString(dateKey),
+            isoDate: dateKey,
+            timestamp: timestamp.getTime()
+          });
+
+          // Debug log
+          Logger.log(`Available date: ${dateKey} -> Display: ${formatThaiDateFromString(dateKey)}`);
+        }
       }
+    } catch (e) {
+      Logger.log("Error processing timestamp in row " + (i + 2) + ": " + e.toString());
     }
   }
 
@@ -288,6 +299,19 @@ function getAvailableDates(days = 14) {
   availableDates.sort((a, b) => b.timestamp - a.timestamp);
 
   return availableDates;
+}
+
+// แปลงวันที่จาก yyyy-MM-dd เป็นภาษาไทย (ไม่ผ่าน Date object เพื่อหลีกเลี่ยง timezone issue)
+function formatThaiDateFromString(dateKey) {
+  const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
+  // dateKey format: "2025-11-27"
+  const parts = dateKey.split("-");
+  const year = parseInt(parts[0]) + 543; // แปลงเป็น พ.ศ.
+  const monthIdx = parseInt(parts[1]) - 1;
+  const day = parseInt(parts[2]);
+
+  return `${day} ${thaiMonths[monthIdx]} ${year}`;
 }
 
 // ดึงรายงานตามวันที่ที่เลือก
