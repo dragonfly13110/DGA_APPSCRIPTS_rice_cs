@@ -281,13 +281,13 @@ function getAvailableDates(days = 14) {
           seenDates.add(dateKey);
 
           availableDates.push({
-            displayText: formatThaiDateFromString(dateKey),
+            displayText: dateKey,  // ใช้ ISO format เลย ไม่แปลงเป็นภาษาไทย
             isoDate: dateKey,
             timestamp: timestamp.getTime()
           });
 
           // Debug log
-          Logger.log(`Available date: ${dateKey} -> Display: ${formatThaiDateFromString(dateKey)}`);
+          Logger.log(`Available date: ${dateKey}`);
         }
       }
     } catch (e) {
@@ -316,6 +316,11 @@ function formatThaiDateFromString(dateKey) {
 
 // ดึงรายงานตามวันที่ที่เลือก
 function getReportByDate(dateString) {
+  Logger.log("=== getReportByDate START ===");
+  Logger.log("Search for: '" + dateString + "'");
+  Logger.log("Search string length: " + dateString.length);
+  Logger.log("Search char codes: " + Array.from(dateString).map(c => c.charCodeAt(0)).join(','));
+
   const ss = SpreadsheetApp.openById(SS_ID);
   const sheet = ss.getSheetByName("AI_Insight");
 
@@ -326,56 +331,119 @@ function getReportByDate(dateString) {
     };
   }
 
-  const dataRange = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2);
+  const lastRow = sheet.getLastRow();
+  Logger.log("Sheet last row: " + lastRow);
+
+  const dataRange = sheet.getRange(2, 1, lastRow - 1, 2);
   const data = dataRange.getValues();
 
-  // ใช้ dateString (yyyy-MM-dd) ที่ส่งมาจาก Frontend ได้เลย เพราะมันถูก format มาจาก getAvailableDates แล้ว
-  // การแปลงกลับไปกลับมาอาจทำให้เกิดปัญหา Timezone Shift
-  const targetDateStr = dateString;
+  Logger.log("Data array length: " + data.length);
+
+  // ทำความสะอาด dateString (trim whitespace)
+  const targetDateStr = dateString.trim();
 
   // หารายงานล่าสุดของวันนั้น
   let foundReport = null;
+  let checkedDates = [];
+  let processedCount = 0;
+  let skippedCount = 0;
+  let formatErrorCount = 0;
 
   for (let i = 0; i < data.length; i++) {
-    try {
-      if (!data[i][0]) continue; // ข้ามแถวที่ไม่มีวันที่
+    processedCount++;
 
-      const timestamp = new Date(data[i][0]);
-      if (isNaN(timestamp.getTime())) continue; // ข้ามวันที่ไม่ถูกต้อง
-
-      // แปลงวันที่ใน Sheet เป็น yyyy-MM-dd (Asia/Bangkok) เพื่อเทียบ
-      const recordDateStr = Utilities.formatDate(timestamp, "Asia/Bangkok", "yyyy-MM-dd");
-
-      if (recordDateStr === targetDateStr) {
-        // เก็บรายงานล่าสุดของวันนั้น (ข้อมูลเรียงจากใหม่ไปเก่า)
-        if (!foundReport) {
-          foundReport = {
-            time: Utilities.formatDate(timestamp, "Asia/Bangkok", "d MMMM yyyy, HH:mm น.", "th_TH"),
-            text: data[i][1] || "ไม่มีข้อมูล"
-          };
-          break; // หยุดทันทีเมื่อเจอรายงานแรก (ล่าสุด)
-        }
-      }
-    } catch (e) {
-      Logger.log("Error parsing date in row " + (i + 2) + ": " + e.toString());
+    if (!data[i][0]) {
+      skippedCount++;
+      Logger.log(`Row ${i + 2}: Empty timestamp, skipping (skipped: ${skippedCount}/${processedCount})`);
       continue;
+    }
+
+    const timestamp = new Date(data[i][0]);
+    if (isNaN(timestamp.getTime())) {
+      skippedCount++;
+      Logger.log(`Row ${i + 2}: Invalid timestamp, skipping (skipped: ${skippedCount}/${processedCount})`);
+      continue;
+    }
+
+    // ลอง format date ด้วย Utilities.formatDate ก่อน ถ้า error ใช้วิธี manual
+    let recordDateStr = null;
+    try {
+      recordDateStr = Utilities.formatDate(timestamp, "Asia/Bangkok", "yyyy-MM-dd").trim();
+    } catch (formatError) {
+      formatErrorCount++;
+      Logger.log(`Row ${i + 2}: Utilities.formatDate error, using manual formatting (errors: ${formatErrorCount})`);
+
+      // Manual formatting as fallback
+      const year = timestamp.getFullYear();
+      const month = String(timestamp.getMonth() + 1).padStart(2, '0');
+      const day = String(timestamp.getDate()).padStart(2, '0');
+      recordDateStr = `${year}-${month}-${day}`;
+
+      Logger.log(`  Manual formatted date: ${recordDateStr}`);
+    }
+
+    if (!recordDateStr) {
+      skippedCount++;
+      Logger.log(`Row ${i + 2}: Could not format date, skipping`);
+      continue;
+    }
+
+    checkedDates.push(recordDateStr);
+
+    const isMatch = (recordDateStr === targetDateStr);
+    const hasText = (data[i][1] && String(data[i][1]).trim().length > 0);
+
+    // Log ALL rows for debugging
+    Logger.log(`Row ${i + 2}: Date=${recordDateStr}, Match=${isMatch}, HasText=${hasText}`);
+
+    if (isMatch) {
+      Logger.log(`  *** POTENTIAL MATCH FOUND at Row ${i + 2} ***`);
+      Logger.log(`  Text length: ${data[i][1] ? String(data[i][1]).length : 0}`);
+      Logger.log(`  Text preview: ${String(data[i][1]).substring(0, 100)}...`);
+
+      // เก็บรายงานล่าสุดของวันนั้น แม้ว่า text จะว่างก็ตาม
+      if (!foundReport && hasText) {
+        let formattedTime = null;
+        try {
+          formattedTime = Utilities.formatDate(timestamp, "Asia/Bangkok", "d MMMM yyyy, HH:mm น.", "th_TH");
+        } catch (e) {
+          // Fallback to simple format
+          formattedTime = recordDateStr;
+        }
+
+        foundReport = {
+          time: formattedTime,
+          text: data[i][1]
+        };
+        Logger.log("  >>> FOUND VALID REPORT! Breaking...");
+        break;
+      } else if (!foundReport && !hasText) {
+        Logger.log("  >>> Match found but text is empty, continuing search...");
+      }
     }
   }
 
+  Logger.log(`Loop completed: processed ${processedCount} rows, skipped ${skippedCount}, format errors ${formatErrorCount}`);
+  Logger.log("All dates found in sheet: " + JSON.stringify([...new Set(checkedDates)]));
+
   if (!foundReport) {
-    // พยายามแปลง dateString กลับเป็นวันที่เพื่อแสดงใน Error Message
     let displayDate = dateString;
     try {
       const d = new Date(dateString);
       displayDate = formatThaiDate(d);
     } catch (e) { }
 
+    const uniqueDates = [...new Set(checkedDates)].sort();
+    Logger.log("NOT FOUND!");
+    Logger.log("=== getReportByDate END ===");
+
     return {
       time: "ไม่มีข้อมูล",
-      text: "ไม่พบรายงานในวันที่ " + displayDate + " (ค้นหา: " + targetDateStr + ")"
+      text: "ไม่พบรายงานในวันที่ " + displayDate + " (ค้นหา: " + targetDateStr + ")\n\nวันที่ที่มีในระบบ: " + uniqueDates.join(", ")
     };
   }
 
+  Logger.log("=== getReportByDate END ===");
   return foundReport;
 }
 
