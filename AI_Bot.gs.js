@@ -109,7 +109,7 @@ function callGeminiAPI(prompt) {
   if (!apiKey) { Logger.log("❌ กรุณาใส่ API Key"); return; }
 
   // ✅ จัดให้ครับ Gemini 2.5 Pro
-  const model = "gemini-2.5-pro";
+  const model = "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const payload = {
