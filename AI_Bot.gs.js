@@ -1,6 +1,6 @@
 // ============================================
 // 🤖 PROJECT: SMART RICE GUARDIAN (ระบบเตือนภัยข้าวอัจฉริยะ)
-// Model: Gemini 2.5 Pro + Google Search + Hybrid Calculation
+// Model: Gemini 2.5 Flash + Google Search + Hybrid Calculation
 // ============================================
 
 const GEMINI_API_KEY = PropertiesService.getScriptProperties().getProperty('GEMINI_API_KEY');
@@ -80,7 +80,7 @@ function runSmartAIAnalysis() {
        - อำเภอไหนมีข้าวอะไรบ้าง ระยะไหนบ้าง "สุกแก่/รอเกี่ยว" หนาแน่นที่สุด?  และทำอะไรไปแล้วบ้างกี่เปอร์เซ็น
        
     3. 🌡️ **แนวโน้มอากาศและคำแนะนำ:**
-       - สรุปสถานการณ์จากข่าวและ API พร้อมคำแนะนำแก่เกษตรกร
+       - สรุปสถานการณ์จากข่าวและ API พร้อมคำแนะนำแก่เกษตรกร 
 
     4. 💡 **ข้อแนะนำถึงเจ้าหน้าที่ในพื้นที่:**
        - ระบุพื้นที่เป้าหมาย ที่เจ้าหน้าที่ต้องลงไปตรวจสอบในช่วงสัปดาห์นี้
@@ -93,28 +93,27 @@ function runSmartAIAnalysis() {
 // 🛠️ ฟังก์ชันย่อย
 // ============================================
 
-// 1. เรียก Gemini (Model: gemini-2.5-pro)
+// 1. เรียก Gemini (Model: gemini-2.5-flash)
 function callGeminiAPI(prompt) {
   // 🛡️ Rate Limiting (Hybrid: Global + Per-Session)
-  // หมายเหตุ: สำหรับ AI Bot ที่รันอัตโนมัติ ใช้ 'system' เป็น sessionId
   const sessionId = 'system_auto_run';
   const rateLimitCheck = checkHybridRateLimit(sessionId, 'gemini_api', RATE_LIMITS.GEMINI_API);
 
   if (!rateLimitCheck.allowed) {
     Logger.log(`⏱️ AI Bot rate limit exceeded: ${rateLimitCheck.error}`);
-    return; // ข้ามไม่รัน (ไม่ throw error เพราะเป็น auto-run)
+    return;
   }
 
   let apiKey = GEMINI_API_KEY;
-  if (!apiKey) { Logger.log("❌ กรุณาใส่ API Key"); return; }
+  if (!apiKey) { Logger.log("❌ กรุณาใส่ GEMINI_API_KEY ใน Script Properties"); return; }
 
-  // ✅ จัดให้ครับ Gemini 2.5 Pro
+  // ✅ ใช้ Gemini 2.5 Flash + Google Search
   const model = "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   const payload = {
     "contents": [{ "parts": [{ "text": prompt }] }],
-    // 👇 ใช้คำสั่ง Search แบบใหม่ (google_search)
+    // 👇 ใช้ Google Search เพื่อค้นหาข้อมูลล่าสุด
     "tools": [{ "google_search": {} }]
   };
 
@@ -127,16 +126,26 @@ function callGeminiAPI(prompt) {
 
   try {
     const response = UrlFetchApp.fetch(url, options);
-    const json = JSON.parse(response.getContentText());
+    const responseCode = response.getResponseCode();
+    const responseText = response.getContentText();
+
+    Logger.log(`📡 Gemini API Response Code: ${responseCode}`);
+
+    if (responseCode !== 200) {
+      Logger.log(`❌ API Error (HTTP ${responseCode}): ${responseText.substring(0, 500)}`);
+      return;
+    }
+
+    const json = JSON.parse(responseText);
 
     // ดึง Text คำตอบ
     let text = json.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (text) {
       saveToSheet(text);
-      Logger.log("✅ Gemini 2.5 Pro วิเคราะห์เสร็จสิ้น!");
+      Logger.log("✅ Gemini 2.5 Flash วิเคราะห์เสร็จสิ้น!");
     } else {
-      Logger.log("⚠️ AI ไม่ตอบกลับ (อาจเป็นเพราะชื่อโมเดลใหม่เกินไป หรือ Server Busy): " + JSON.stringify(json));
+      Logger.log("⚠️ AI ไม่ตอบกลับ: " + JSON.stringify(json));
     }
   } catch (e) {
     Logger.log("❌ Error: " + e.toString());
