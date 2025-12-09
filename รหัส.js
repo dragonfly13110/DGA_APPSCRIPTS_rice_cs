@@ -4,6 +4,25 @@
 const SPREADSHEET_ID = "1QyruEowKFva5n7JNiizQ-0IR3rV87ReYNPSnWXT9eac"; // Make sure this is your actual Spreadsheet ID
 const SHEET_NAME = "DGA_rice_Cha_2568/69"; // Make sure this is your actual Sheet Name
 
+// ============================================
+// Input Validation Limits
+// ============================================
+const VALIDATION_LIMITS = {
+  YIELD_PER_RAI: {
+    MIN: 200,    // กก./ไร่ ขั้นต่ำ
+    MAX: 1500    // กก./ไร่ สูงสุด
+  },
+  AREA_RAI: {
+    MIN: 0.25,   // ไร่ ขั้นต่ำ (1 งาน = 0.25 ไร่)
+    MAX: 15000    // ไร่ สูงสุด (พื้นที่ใหญ่สุดต่อ 1 รายการ)
+  }
+};
+
+// Function to get validation limits for client-side use
+function getValidationLimits() {
+  return VALIDATION_LIMITS;
+}
+
 const districtsData = {
   "เมืองฉะเชิงเทรา": ["หน้าเมือง", "ท่าไข่", "บ้านใหม่", "คลองนา", "บางตีนเป็ด", "บางไผ่", "คลองจุกกระเฌอ", "บางแก้ว", "บางขวัญ", "คลองนครเนื่องเขต", "วังตะเคียน", "โสธร", "บางพระ", "บางกะไห", "หนามแดง", "คลองเปรง",
     "คลองอุดมชลจร", "คลองหลวงแพ่ง", "บางเตย"],
@@ -264,11 +283,23 @@ function saveData(payload) {
     const rowsToAdd = [];
     const currentTimestamp = new Date();
     const reportDateForSheet = targetDateForSave; // Use the already validated Date object
+    const validationErrors = []; // เก็บรายการข้อมูลที่ผิดพลาด
 
-    entriesFromClient.forEach(entry => {
+    entriesFromClient.forEach((entry, index) => {
       const variety = entry.variety;
       const area = parseFloat(entry.area) || 0;
       const yieldPerRaiKg = parseFloat(entry.yieldPerRai) || 0;
+      const tambon = entry.tambon || `รายการที่ ${index + 1}`;
+
+      // ตรวจสอบขอบเขตค่าพื้นที่เพาะปลูก
+      if (area > 0 && (area < VALIDATION_LIMITS.AREA_RAI.MIN || area > VALIDATION_LIMITS.AREA_RAI.MAX)) {
+        validationErrors.push(`${tambon}: พื้นที่ ${area} ไร่ ไม่อยู่ในช่วงที่กำหนด (${VALIDATION_LIMITS.AREA_RAI.MIN}-${VALIDATION_LIMITS.AREA_RAI.MAX} ไร่)`);
+      }
+
+      // ตรวจสอบขอบเขตค่าผลผลิตต่อไร่
+      if (yieldPerRaiKg > 0 && (yieldPerRaiKg < VALIDATION_LIMITS.YIELD_PER_RAI.MIN || yieldPerRaiKg > VALIDATION_LIMITS.YIELD_PER_RAI.MAX)) {
+        validationErrors.push(`${tambon}: ผลผลิต ${yieldPerRaiKg} กก./ไร่ ไม่อยู่ในช่วงที่กำหนด (${VALIDATION_LIMITS.YIELD_PER_RAI.MIN}-${VALIDATION_LIMITS.YIELD_PER_RAI.MAX} กก./ไร่)`);
+      }
 
       if (variety && area > 0 && yieldPerRaiKg > 0) {
         const totalYieldKg = area * yieldPerRaiKg;
@@ -290,6 +321,14 @@ function saveData(payload) {
         rowsToAdd.push(newRow);
       }
     });
+
+    // ถ้ามี validation errors ให้ return error กลับไป (ไม่บันทึกข้อมูล)
+    if (validationErrors.length > 0) {
+      Logger.log(`Server Error (saveData): Validation failed. Errors: ${validationErrors.join('; ')}`);
+      return {
+        error: `ข้อมูลไม่ถูกต้อง:\n${validationErrors.join('\n')}`
+      };
+    }
 
     if (rowsToAdd.length > 0) {
       const firstNewRow = sheet.getLastRow() + 1;
