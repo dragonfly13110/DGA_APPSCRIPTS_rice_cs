@@ -963,6 +963,10 @@
 
     let districtsData = {};
     let currentLoadedData = null;
+    let validationLimits = {
+      YIELD_PER_RAI: { MIN: 200, MAX: 1500 },
+      AREA_RAI: { MIN: 0.25, MAX: 15000 }
+    }; // ค่าเริ่มต้น จะถูกอัพเดทจาก server
 
     document.addEventListener('DOMContentLoaded', initializePage);
 
@@ -989,6 +993,19 @@
           showError("เกิดข้อผิดพลาดในการโหลดข้อมูลตั้งต้น: " + (err.message || JSON.stringify(err)));
         })
         .getInitialData();
+
+      // โหลด validation limits จาก server
+      google.script.run
+        .withSuccessHandler(limits => {
+          if (limits) {
+            validationLimits = limits;
+            console.log('✅ โหลด validation limits สำเร็จ:', validationLimits);
+          }
+        })
+        .withFailureHandler(err => {
+          console.warn('⚠️ ไม่สามารถโหลด validation limits ได้, ใช้ค่าเริ่มต้น');
+        })
+        .getValidationLimits();
 
       updateContextBar();
       recalcTotals(); // zero
@@ -1326,6 +1343,17 @@
             if (yieldPerRaiStr.trim() !== '' && (isNaN(parseFloat(yieldPerRaiStr)) || parseFloat(yieldPerRaiStr) < 0)) {
               showError(`[${tambonName}] แถวที่ ${index + 1}: ผลผลิต/ไร่ฯ ต้องเป็นตัวเลขไม่ติดลบ`); isValid = false; return;
             }
+
+            // ✅ ตรวจสอบขอบเขตค่าพื้นที่เพาะปลูก
+            if (area > 0 && (area < validationLimits.AREA_RAI.MIN || area > validationLimits.AREA_RAI.MAX)) {
+              showError(`[${tambonName}] แถวที่ ${index + 1}: พื้นที่ ${area.toFixed(2)} ไร่ ไม่อยู่ในช่วงที่กำหนด (${validationLimits.AREA_RAI.MIN}-${validationLimits.AREA_RAI.MAX} ไร่)`); isValid = false; return;
+            }
+
+            // ✅ ตรวจสอบขอบเขตค่าผลผลิตต่อไร่
+            if (yieldPerRai > 0 && (yieldPerRai < validationLimits.YIELD_PER_RAI.MIN || yieldPerRai > validationLimits.YIELD_PER_RAI.MAX)) {
+              showError(`[${tambonName}] แถวที่ ${index + 1}: ผลผลิต ${yieldPerRai.toFixed(2)} กก./ไร่ ไม่อยู่ในช่วงที่กำหนด (${validationLimits.YIELD_PER_RAI.MIN}-${validationLimits.YIELD_PER_RAI.MAX} กก./ไร่)`); isValid = false; return;
+            }
+
             if (area > 0 && yieldPerRai <= 0) {
               showError(`[${tambonName}] แถวที่ ${index + 1}: หากมีพื้นที่เพาะปลูก (${area.toFixed(2)} ไร่) ผลผลิตต่อไร่ฯ ต้องมากกว่า 0`); isValid = false; return;
             }
